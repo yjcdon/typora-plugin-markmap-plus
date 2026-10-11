@@ -66,7 +66,7 @@ export interface TocMindmapOptions {
   tocWindowWidth: number
   /** 目录思维导图窗口的默认高度（像素） */
   tocWindowHeight: number
-  /** 思维导图初始展开到第几级标题（6 则包含正文） */
+  /** 思维导图初始展开到第几级标题（6 表示展开全部标题和正文节点） */
   initialExpandLevel: number
   /** 缩放操作的步长（每次放大/缩小的比例） */
   zoomStep: number
@@ -126,7 +126,7 @@ export interface TocMindmapOptions {
 export const DEFAULT_TOC_OPTIONS: TocMindmapOptions = {
   tocWindowWidth: 450,          // 默认窗口宽度 450 像素
   tocWindowHeight: 600,         // 默认窗口高度 600 像素
-  initialExpandLevel: 3,        // 默认展开到第 3 级标题
+  initialExpandLevel: 6,        // 默认展开全部标题和正文节点
   zoomStep: 0.2,                // 默认缩放步长为 20%
   enableRealTimeUpdate: true,   // 默认启用实时更新
   keepFoldStateWhenUpdate: true,// 默认在更新时保持节点折叠状态
@@ -467,6 +467,7 @@ export class TocMindmapComponent {
     // 合并新配置到当前配置，优先使用新配置
     this.options = { ...this.options, ...newOptions };
     this._updateHighlightStyle(); // 更新高亮样式
+    this.state.lastHeadingsHash = ''; // 配置变化也需要重新应用渲染选项
 
     // 如果 widthPercentWhenPin 改变且当前处于 pin 状态，重新计算布局
     if (newOptions.widthPercentWhenPin !== undefined && (this.state.isPinLeft || this.state.isPinRight)) {
@@ -476,6 +477,10 @@ export class TocMindmapComponent {
     // 为简单起见，如果组件可见，则执行一次完整的更新
     // 这足以安全地覆盖所有设置更改，确保新设置立即生效
     if (this.isVisible) {
+      if (newOptions.initialExpandLevel !== undefined) {
+        this._cleanupRealTimeUpdate();
+        this._initRealTimeUpdate();
+      }
       this._update(); // 执行更新操作
     }
   }
@@ -830,7 +835,9 @@ export class TocMindmapComponent {
 
     for (const line of lines) {
       const fenceMatch = line.match(/^(\s*)(`{3,}|~{3,})(.*)$/);
-      const isIndentedCodeLine = !inFenceBlock && /^( {4,}|\t)/.test(line);
+      // 深层列表也会缩进四个空格以上，不能把列表项当作代码丢弃。
+      const isIndentedCodeLine = !inFenceBlock && /^( {4,}|\t)/.test(line)
+        && !/^\s*(?:[-+*]|\d+[.)])\s+/.test(line);
 
       if (fenceMatch) {
         const marker = fenceMatch[2][0];
@@ -955,10 +962,11 @@ export class TocMindmapComponent {
     if (!this.state.element) return;
 
     const headingRefs = this._getHeadingRefs();               // 获取文档中的标题引用
+    let markdownContent = this.editorAdapter.getMarkdown();
     // 生成标题内容的哈希值，用于检测变化
-    const contentHash = headingRefs
-      .map(item => `${item.id}:${item.text}`)
-      .join('|');
+    const contentHash = this.options.initialExpandLevel === 6
+      ? markdownContent
+      : headingRefs.map(item => `${item.id}:${item.text}`).join('|');
 
     // 如果内容哈希值未变化，则直接返回
     if (contentHash === this.state.lastHeadingsHash) return;
@@ -966,7 +974,6 @@ export class TocMindmapComponent {
     logger('更新 TOC Markmap');                               // 记录更新日志
     this.state.lastHeadingsHash = contentHash;                // 更新哈希值
 
-    let markdownContent = this.editorAdapter.getMarkdown();   // 获取 Markdown 内容
     // 获取 SVG 元素
     const svg = this.state.element.querySelector('.markmap-svg') as SVGElement;
     if (!svg) return;                                         // 如果 SVG 元素不存在，则返回
@@ -996,7 +1003,7 @@ export class TocMindmapComponent {
       paddingX: this.options.paddingX,                        // 水平内边距
       color: this.options.nodeColors,                         // 节点颜色方案
       colorFreezeLevel: this.options.colorFreezeLevel,        // 颜色冻结层级
-      initialExpandLevel: adjustedExpandLevel > 5 ? 6 : adjustedExpandLevel, // 初始展开层级
+      initialExpandLevel: this.options.initialExpandLevel === 6 ? -1 : adjustedExpandLevel,
       duration: 0,                                            // 节点展开、折叠立即完成
     });
 
@@ -1919,6 +1926,11 @@ export class TocMindmapComponent {
     }
 
     logger('开始初始化实时更新功能');
+    // 全文模式需要监听正文修改，outlineUpdated 只覆盖标题。
+    if (this.options.initialExpandLevel === 6) {
+      this._initMutationObserver();
+      return;
+    }
     // 尝试使用 Typora 的事件系统，失败则回退到 MutationObserver
     if (!this._tryInitTyporaEventSystem()) {
       logger('Typora 事件系统初始化失败，回退到 MutationObserver');
@@ -2002,6 +2014,10 @@ export class TocMindmapComponent {
     logger('开始初始化 MutationObserver');
     // 创建 MutationObserver 实例
     this.state.contentObserver = new MutationObserver((mutations) => {
+      if (this.options.initialExpandLevel === 6) {
+        this.debouncedUpdate();
+        return;
+      }
       logger(`MutationObserver 检测到 ${mutations.length} 个变化`);
       // 只检查与标题相关的变化
       const hasHeadingChanges = mutations.some(mutation => {
