@@ -171,8 +171,9 @@ const COMPONENT_STYLE = `
     right: 20px;                        /* 距离右侧 20px */
     width: 450px;                       /* 宽度 450px */
     height: 500px;                      /* 高度 500px */
-    background-color: #ffffff;          /* 背景色为白色 */
-    border: 1px solid #e0e0e0;          /* 边框为浅灰色 */
+    background-color: var(--bg-color, #fff);
+    color: var(--text-color, #333);
+    border: var(--window-border, 1px solid #e0e0e0);
     border-radius: 8px;                 /* 圆角 8px */
     box-shadow: 0 4px 20px rgba(0,0,0,0.15); /* 阴影效果 */
     z-index: 100;                       /* z-index 层级为 100 */
@@ -191,17 +192,17 @@ const COMPONENT_STYLE = `
   /* TOC 弹窗头部样式 */
   .markmap-toc-header {
     padding: 10px;                      /* 内边距 10px */
-    border-bottom: 1px solid #eee;      /* 底部边框 */
+    border-bottom: var(--window-border, 1px solid #eee);
     display: flex;                      /* 弹性布局 */
     justify-content: space-between;     /* 子元素两端对齐 */
     align-items: center;                /* 垂直居中对齐 */
-    background: #f8f9fa;                /* 背景色 */
+    background: var(--side-bar-bg-color, var(--bg-color, #fff));
     cursor: move;                       /* 鼠标样式为移动 */
   }
 
   .markmap-toc-title {
     font-weight: bold;                  /* 粗体 */
-    color: #333;                        /* 文字颜色 */
+    color: var(--text-color, #333);
   }
   .markmap-toc-buttons {
     display: flex;                      /* 弹性布局 */
@@ -210,13 +211,14 @@ const COMPONENT_STYLE = `
   }
   .markmap-toc-btn {
     background: none;                   /* 无背景 */
+    color: var(--control-text-color, var(--text-color, #333));
     border: none;                       /* 无边框 */
     cursor: pointer;                    /* 鼠标样式为指针 */
     padding: 4px;                       /* 内边距 4px */
     border-radius: 3px;                 /* 圆角 3px */
   }
   .markmap-toc-btn:hover {
-    background-color: #e9ecef;          /* 悬停时的背景色 */
+    background-color: var(--item-hover-bg-color, #e6f0fe);
   }
 
   /* TOC 弹窗内容区域样式 */
@@ -229,13 +231,21 @@ const COMPONENT_STYLE = `
     height: 100%;                       /* 高度 100% */
   }
 
+  /* Typora 主题变量直接参与渲染，切换主题无需重建导图。 */
+  .markmap-toc-modal .markmap {
+    --markmap-text-color: var(--text-color, #333);
+    --markmap-circle-open-bg: var(--bg-color, #fff);
+    --markmap-code-bg: var(--rawblock-edit-panel-bd, #f0f0f0);
+    --markmap-code-color: var(--text-color, #555);
+  }
+
   /* 导出菜单样式 */
   .markmap-export-menu {
     position: absolute;                 /* 绝对定位 */
     top: 54px;
     right: 12px;
-    background: white;                  /* 背景色为白色 */
-    border: 1px solid #e0e0e0;          /* 边框 */
+    background: var(--bg-color, #fff);
+    border: var(--window-border, 1px solid #e0e0e0);
     border-radius: 4px;                 /* 圆角 */
     box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* 阴影 */
     z-index: 101;                       /* z-index 层级 */
@@ -256,11 +266,11 @@ const COMPONENT_STYLE = `
     padding: 8px 16px;                  /* 内边距 */
     cursor: pointer;                    /* 鼠标样式为指针 */
     font-size: 14px;                    /* 字体大小 */
-    color: #333;                        /* 文字颜色 */
+    color: var(--text-color, #333);
   }
 
   .markmap-export-item:hover {
-    background-color: #f5f5f5;          /* 悬停时的背景色 */
+    background-color: var(--item-hover-bg-color, #e6f0fe);
   }
 
   /* 固定到右侧状态样式 */
@@ -321,12 +331,12 @@ const COMPONENT_STYLE = `
     font-size: 16px;                    /* 字体大小 */
     background: transparent;            /* 透明背景 */
     border: none;                       /* 无边框 */
-    color: #666;                        /* 文字颜色 */
+    color: var(--control-text-color, var(--text-color, #333));
   }
 
   .markmap-toc-modal.toolbar-side .markmap-toc-btn:hover {
-    background: rgba(0,0,0,0.05);       /* 悬停时淡灰色背景 */
-    color: #333;                        /* 悬停时文字变深 */
+    background: var(--item-hover-bg-color, #e6f0fe);
+    color: var(--control-text-hover-color, var(--text-color, #333));
   }
 
   .markmap-toc-modal.toolbar-side .markmap-toc-content {
