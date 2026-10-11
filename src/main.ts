@@ -76,13 +76,14 @@ class TyporaAdapter implements IEditorAdapter {
     return write.querySelector(`[cid="${id}"]`) as HTMLElement | null;
   }
 
+  /** 点击节点文字时立即定位正文，保留短暂的静态位置提示。 */
   scrollToHeading(id: string, options: { offsetTop: number; highlightClassName: string; highlightDuration: number }): HTMLElement | null {
     const element = this.resolveHeadingElement(id);
     if (!element) return null;
 
     const originalMargin = element.style.scrollMarginTop;
     element.style.scrollMarginTop = `${options.offsetTop}px`;
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    element.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' });
     element.classList.add(options.highlightClassName);
 
     setTimeout(() => {

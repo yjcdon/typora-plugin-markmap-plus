@@ -31,7 +31,6 @@ export const SETTING_CONSTRAINTS = {
   initialExpandLevel: { min: 1, max: 6, default: DEFAULT_TOC_OPTIONS.initialExpandLevel },
   zoomStep: { min: 0.1, max: 1.0, default: DEFAULT_TOC_OPTIONS.zoomStep },
   floatingButtonSize: { min: 30, max: 100, default: DEFAULT_FLOATING_BUTTON_OPTIONS.floatingButtonSize },
-  animationDuration: { min: 0, max: 1000, default: DEFAULT_TOC_OPTIONS.animationDuration },
   scrollOffsetTop: { min: 0, max: 500, default: DEFAULT_TOC_OPTIONS.scrollOffsetTop },
   headingHighlightColor: { default: DEFAULT_TOC_OPTIONS.headingHighlightColor },
   nodeHighlightColor: { default: DEFAULT_TOC_OPTIONS.nodeHighlightColor },
@@ -205,26 +204,6 @@ export class MarkmapSettingTab extends SettingTab {
         }
       })
     })
-
-    // 动画持续时间设置
-    this.addSetting(item => {
-      item.addName('动画持续时间')
-      item.addDescription('思维导图更新时的动画持续时间（毫秒），设为 0 禁用动画')
-      item.addInput('number', (input) => {
-        const config = SETTING_CONSTRAINTS.animationDuration
-        input.value = this.settings.get('animationDuration').toString()
-        input.min = config.min.toString()
-        input.max = config.max.toString()
-        input.step = '50'
-        input.onchange = () => {
-          const value = parseInt(input.value)
-          if (value >= config.min && value <= config.max) {
-            this.settings.set('animationDuration', value)
-          }
-        }
-      })
-    })
-
 
     // 悬浮按钮大小设置
     this.addSetting(item => {

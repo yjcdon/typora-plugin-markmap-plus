@@ -76,8 +76,6 @@ export interface TocMindmapOptions {
   keepFoldStateWhenUpdate: boolean
   /** 更新时是否自动适应视图 */
   autoFitWhenUpdate: boolean
-  /** 动画持续时间（毫秒），0 表示禁用动画 */
-  animationDuration: number
   /** 点击跳转时距离视窗顶部的像素距离 */
   scrollOffsetTop: number
   /** 点击跳转后文档标题的背景高亮颜色 */
@@ -133,7 +131,6 @@ export const DEFAULT_TOC_OPTIONS: TocMindmapOptions = {
   enableRealTimeUpdate: true,   // 默认启用实时更新
   keepFoldStateWhenUpdate: true,// 默认在更新时保持节点折叠状态
   autoFitWhenUpdate: false,     // 默认在更新时不自动适应视图
-  animationDuration: 500,       // 默认动画持续时间为 500 毫秒
   scrollOffsetTop: 80,          // 默认滚动偏移为 80 像素
   headingHighlightColor: 'rgba(255, 215, 0, 0.5)', // 默认标题高亮颜色为金色半透明
   nodeHighlightColor: 'rgba(142, 110, 255, 0.7)',  // 默认节点高亮颜色为紫色半透明
@@ -771,8 +768,7 @@ export class TocMindmapComponent {
    * 动态更新高亮样式
    *
    * 根据用户在设置中选择的颜色，动态创建或更新一个 <style> 标签，
-   * 其中包含高亮动画的 @keyframes 规则。
-   * 这使得高亮颜色可以由用户自定义。
+   * 使用静态背景提示跳转位置，避免点击节点后出现渐变动画。
    */
   private _updateHighlightStyle() {
     const styleId = 'markmap-highlight-style';                // 定义样式 ID
@@ -787,17 +783,8 @@ export class TocMindmapComponent {
     }
 
     const color = this.options.headingHighlightColor;         // 获取标题高亮颜色
-    const duration = this.options.highlightDuration / 1000;    // 获取持续时间并转换为秒
-    // 动态生成 keyframes，将用户自定义颜色和持续时间注入
     styleTag.textContent = `
-      @keyframes markmap-highlight-animation {
-        from { background: ${color}; }                        /* 起始背景色 */
-        to { background: transparent; }                       /* 结束背景色为透明 */
-      }
-
-      .markmap-highlight {
-        animation: markmap-highlight-animation ${duration}s ease-out; /* 应用动画 */
-      }
+      #write .markmap-highlight { background: ${color}; }
     `;
   }
 
@@ -943,6 +930,9 @@ export class TocMindmapComponent {
       return; // 处理完按钮点击后结束，避免继续处理其他点击逻辑
     }
 
+    // 圆点只负责折叠/展开，不同时触发正文跳转。
+    if (target.closest('.markmap-node > circle')) return;
+
     // 检查是否点击了思维导图节点（向上查找 .markmap-node）
     let nodeEl: Element | null = target;
     while (nodeEl && nodeEl !== this.state.element) {
@@ -1007,7 +997,7 @@ export class TocMindmapComponent {
       color: this.options.nodeColors,                         // 节点颜色方案
       colorFreezeLevel: this.options.colorFreezeLevel,        // 颜色冻结层级
       initialExpandLevel: adjustedExpandLevel > 5 ? 6 : adjustedExpandLevel, // 初始展开层级
-      duration: this.options.animationDuration,               // 动画持续时间
+      duration: 0,                                            // 节点展开、折叠立即完成
     });
 
     // 如果 Markmap 实例已存在，则更新数据
@@ -1087,7 +1077,7 @@ export class TocMindmapComponent {
 
     const originalMargin = element.style.scrollMarginTop;
     element.style.scrollMarginTop = `${this.options.scrollOffsetTop}px`;
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    element.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' });
     element.classList.add('markmap-highlight');
     setTimeout(() => {
       element.style.scrollMarginTop = originalMargin;
@@ -1187,7 +1177,7 @@ export class TocMindmapComponent {
         element = this._scrollToHeading(headingId) || element;
       } else if (element) {
         logger(`跳转到标题: ${path}`);
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        element.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' });
       } else {
         logger(`未找到路径对应的元素: ${path}`, 'warn');
       }
