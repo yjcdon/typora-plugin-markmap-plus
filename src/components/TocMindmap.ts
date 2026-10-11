@@ -963,10 +963,11 @@ export class TocMindmapComponent {
 
     const headingRefs = this._getHeadingRefs();               // 获取文档中的标题引用
     let markdownContent = this.editorAdapter.getMarkdown();
-    // 生成标题内容的哈希值，用于检测变化
+    // 标题块 ID 可能在切换文档或重新解析时变化，即使 Markdown 相同也要更新映射。
+    const headingSignature = headingRefs.map(({ id, text, level }) => [id, text, level]);
     const contentHash = this.options.initialExpandLevel === 6
-      ? markdownContent
-      : headingRefs.map(item => `${item.id}:${item.text}`).join('|');
+      ? JSON.stringify([markdownContent, headingSignature])
+      : JSON.stringify(headingSignature);
 
     // 如果内容哈希值未变化，则直接返回
     if (contentHash === this.state.lastHeadingsHash) return;
@@ -1187,7 +1188,9 @@ export class TocMindmapComponent {
       const tag = node.payload?.tag;
       if (typeof tag === 'string' && /^h[1-6]$/.test(tag)) {
         const text = this._getNodeText(node);
-        const index = headingRefs.findIndex((heading, i) => i >= nextHeadingIndex && heading.text === text);
+        const level = Number(tag[1]);
+        const index = headingRefs.findIndex((heading, i) => i >= nextHeadingIndex
+          && heading.level === level && heading.text === text);
         if (index >= 0) {
           const heading = headingRefs[index];
           const path = node.state.path;

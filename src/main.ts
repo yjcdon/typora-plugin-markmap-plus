@@ -33,41 +33,23 @@ const LEGACY_PLUGIN_IDS = [
  * Typora 编辑器适配器
  */
 class TyporaAdapter implements IEditorAdapter {
-  private getHeadingText(text: string): string {
-    return text.replace(/^\s{0,3}#{1,6}\s+/, '').trim();
-  }
-
   getMarkdown(): string {
     return editor.getMarkdown();
   }
 
+  /** 使用 Typora 大纲的纯文本标题，保留格式解析结果、文档顺序和块 ID。 */
   getHeadingRefs(): HeadingRef[] {
     const write = document.querySelector('#write');
-    const headers = (window as any).File?.editor?.nodeMap?.toc?.headers;
-
-    if (Array.isArray(headers) && write) {
-      const refs: Array<HeadingRef | null> = headers
-        .map((header: any) => {
-          const id = header?.cid;
-          const rawText = header?.attributes?.text ?? header?.text ?? header?.get?.('text') ?? '';
-          const text = this.getHeadingText(rawText);
-          const level = Number(header?.depth ?? header?.lvl ?? header?.level ?? header?.attributes?.depth ?? 0) || 0;
-          const element = id ? (write.querySelector(`[cid="${id}"]`) as HTMLElement | null) : null;
-          return id ? { id, text, level, element: element || undefined } : null;
-        });
-      return refs.filter((item): item is HeadingRef => !!item && !!item.text);
-    }
-
     if (!write) return [];
-
-    const refs: Array<HeadingRef | null> = Array.from(write.querySelectorAll('[mdtype="heading"]'))
-      .map((element) => {
-        const id = element.getAttribute('cid') || '';
-        const text = this.getHeadingText(element.textContent || '');
-        const level = Number(element.tagName.replace(/[^\d]/g, '')) || 0;
-        return id ? { id, text, level, element: element as HTMLElement } : null;
-      });
-    return refs.filter((item): item is HeadingRef => !!item && !!item.text);
+    const outline = (editor.library as typeof editor.library & {
+      outline: { getHeaderMatrix(plainText: boolean): Array<[level: number, text: string, id: string]> };
+    }).outline;
+    return outline.getHeaderMatrix(true).map(([level, text, id]) => ({
+      id,
+      text: text.trim(),
+      level,
+      element: write.querySelector<HTMLElement>(`[cid="${id}"]`) || undefined,
+    }));
   }
 
   resolveHeadingElement(id: string): HTMLElement | null {
