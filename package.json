@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "typora-plugin-markmap-plus",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Enhanced Typora plugin for creating interactive mind maps with advanced features and settings.",
   "type": "module",
   "main": "dist/main.js",

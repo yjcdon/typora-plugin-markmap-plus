@@ -1018,10 +1018,8 @@ export class TocMindmapComponent {
       setTimeout(() => this.state.markmap?.fit(), this.options.delayInitialFit);
     }
 
-    // 延迟执行同步映射操作
-    setTimeout(() => {
-      this._syncMapsAfterRender(root, headingRefs);
-    }, this.options.delayAttributeSet);
+    // setData 在首次 await 前已生成路径，立即同步当前数据，避免点击读到旧映射。
+    this._syncMapsAfterRender(this.state.markmap.state.data, headingRefs);
   }
 
   // --- 工具方法：标题处理 ---
@@ -1141,56 +1139,13 @@ export class TocMindmapComponent {
    * @param nodeEl 节点元素
    */
   private _scrollToHeadingByNode(nodeEl: Element) {
-    // 从点击的 DOM 元素中获取 Markmap 节点数据
-    let currentNode = (nodeEl as any).__data__;
-    // 如果无法获取节点数据，则记录警告日志并返回
-    if (!currentNode) {
-      logger('无法从 DOM 元素获取节点数据', 'warn');
-      return;
-    }
-
-    // 向上遍历节点树，直到找到一个在 headingElements 中有记录的标题节点
-    // 这是为了处理点击"正文内容"节点时，能够定位到其所属的标题
-    while (currentNode && !this.state.headingIds.has(currentNode.state?.path)) {
-      // 如果当前节点没有在映射中，则移动到其父节点
-      currentNode = currentNode.parent;
-    }
-    // 记录当前节点内容
-
-    // 如果找到了对应的标题节点
-    if (currentNode && currentNode.state?.path) {
-      const path = currentNode.state.path;                    // 获取节点路径
-      const headingId = this.state.headingIds.get(path);
-      let element: HTMLElement | undefined = (headingId ? this._resolveHeadingElement(headingId) || undefined : undefined)
-        || this.state.headingElements.get(path);              // 根据路径获取标题元素
-
-      // 降级方案：通过节点内容匹配文档标题
-      if (!element && headingId) {
-        element = this._resolveHeadingElement(headingId) || undefined;
-      }
-      if (!element) {
-        const node = this._findNodeByStatePath(path);
-        if (node?.content) {
-          const nodeText = this._getNodeText(node);
-          const headingRef = this._getHeadingRefs().find(h => h.text === nodeText);
-          if (headingRef) {
-            element = this._resolveHeadingElement(headingRef.id) || headingRef.element || undefined;
-          }
-        }
-      }
-
-      if (headingId) {
-        logger(`跳转到标题: ${path}`);
-        element = this._scrollToHeading(headingId) || element;
-      } else if (element) {
-        logger(`跳转到标题: ${path}`);
-        element.scrollIntoView({ behavior: 'instant' as ScrollBehavior, block: 'start' });
-      } else {
-        logger(`未找到路径对应的元素: ${path}`, 'warn');
-      }
-    } else {
-      logger(`未找到任何可跳转的父级标题节点`, 'warn');
-    }
+    const node = (nodeEl as Element & { __data__: INode }).__data__;
+    // Markmap 节点没有 parent 引用；路径包含层级，从自身向上找最近标题。
+    const paths = [...this._getAncestorPaths(node.state.path), node.state.path].reverse();
+    const headingPath = paths.find(path => this.state.headingIds.has(path));
+    // 无标题的文档或虚拟根节点没有可跳转目标。
+    if (!headingPath) return;
+    this._scrollToHeading(this.state.headingIds.get(headingPath)!);
   }
 
   //----------------思维导图节点处理相关方法---------------------
@@ -1218,85 +1173,36 @@ export class TocMindmapComponent {
   }
 
   /**
-   * 同步双向索引Map
-   *
-   * 此函数在每次更新思维导图数据(setData)之后被调用，负责建立和维护两个关键的双向映射关系：
-   * 1. 从 Markmap 节点路径(state.path)到文档中实际标题元素的映射 (headingElements)
-   * 2. 从文档中实际标题元素到 Markmap 节点路径的映射 (elementToPath)
-   *
-   * 这两个映射对于实现点击思维导图节点跳转到对应标题的功能至关重要。
-   *
-   * 工作原理:
-   * 1. 清空旧的映射关系，确保数据一致性
-   * 2. 收集所有非根节点，构建待处理节点列表
-   * 3. 遍历节点列表，将节点内容与标题元素进行匹配
-   * 4. 匹配成功时建立双向映射关系
-   *
-   * 匹配策略:
-   * - 通过比较节点文本内容(node.content)和标题元素文本内容来确定对应关系
-   * - 使用临时DOM元素(tempDiv)解析节点HTML内容，提取纯文本进行比较
-   * - 严格按照顺序匹配，确保标题元素与节点的一一对应关系
-   *
-   * @param root INode树根节点 - 来自 Markmap 转换后的节点树根节点
-   * @param headingRefs HeadingRef数组 - 文档中所有的标题引用数组
+   * 将真实标题节点（包括根标题）按文档顺序绑定到 Typora 标题 ID。
+   * 正文和虚拟根不参与匹配；同名标题依靠出现顺序区分。
+   * @param root setData 初始化路径后的节点树
+   * @param headingRefs 按文档顺序采集的标题引用
    */
-  private _syncMapsAfterRender(root: INode | IPureNode, headingRefs: HeadingRef[]): void {
-    // 清空旧的映射关系，确保每次更新都是全新的映射
+  private _syncMapsAfterRender(root: INode, headingRefs: HeadingRef[]): void {
     this.state.headingElements.clear();
     this.state.headingIds.clear();
     this.state.elementToPath.clear();
-
-    // 收集所有非根节点，用于后续遍历处理
-    // 根节点通常不对应具体的文档标题，所以排除在外
-    const nodeList: (INode | IPureNode)[] = [];
-    const collectNodes = (node: INode | IPureNode, isRoot = false) => {
-      // 只有非根节点才加入列表
-      if (!isRoot) nodeList.push(node);
-      // 递归收集所有子节点
-      node.children?.forEach(child => collectNodes(child, false));
-    };
-    collectNodes(root, true);
-
-    // 标题元素索引，用于顺序匹配
-    let headingDomIndex = 0;
-    const sources = headingRefs;
-
-    // 遍历收集到的所有节点，并与标题元素进行匹配
-    logger(`开始匹配: nodeList=${nodeList.length}, headings=${sources.length}`);
-    for (let i = 0; i < nodeList.length; ) {
-      const node = nodeList[i];
-      // 如果标题元素已经全部匹配完毕，则停止处理
-      if (headingDomIndex >= sources.length) break;
-
-      // 确保节点有state和path，如果没有则生成临时path
-      if (!('state' in node)) continue;
-
-      const originalPath = node.state.path;
-
-      // 获取当前待匹配的标题元素
-      const currentHeading = sources[headingDomIndex];
-      const cleanNodeText = this._getNodeText(node);
-      const currentHeadingText = currentHeading.text;
-
-      // 当前节点内容与当前标题元素文本一致时，建立双向映射
-      // trim()用于去除首尾空白字符，提高匹配准确性
-      if (cleanNodeText === currentHeadingText) {
-        // 获取节点路径，作为映射的键
-        const path = node.state.path;
-        this.state.headingIds.set(path, currentHeading.id);
-        if (currentHeading.element) {
-          this.state.headingElements.set(path, currentHeading.element);
-          this.state.elementToPath.set(currentHeading.element, path);
+    let nextHeadingIndex = 0;
+    const visit = (node: INode) => {
+      const tag = node.payload?.tag;
+      if (typeof tag === 'string' && /^h[1-6]$/.test(tag)) {
+        const text = this._getNodeText(node);
+        const index = headingRefs.findIndex((heading, i) => i >= nextHeadingIndex && heading.text === text);
+        if (index >= 0) {
+          const heading = headingRefs[index];
+          const path = node.state.path;
+          this.state.headingIds.set(path, heading.id);
+          if (heading.element) {
+            this.state.headingElements.set(path, heading.element);
+            this.state.elementToPath.set(heading.element, path);
+          }
+          nextHeadingIndex = index + 1;
         }
-
-        // 移动到下一个标题元素
-        headingDomIndex++;
-        i++;
-      } else {
-        headingDomIndex++;
       }
-    }
-    logger(`匹配完成: 成功映射 ${this.state.headingElements.size} 个节点`);
+      node.children.forEach(visit);
+    };
+    visit(root);
+    logger(`匹配完成: 成功映射 ${this.state.headingIds.size} 个标题`);
   }
 
   /**
