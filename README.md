@@ -161,11 +161,12 @@ markdown（Typora）原生的大纲功能单一，预览体验极差
 
 ## 🚀 安装
 
-1. 从 [GitHub Releases](https://github.com/util6/typora-plugin-markmap-plus/releases) 下载最新的 `plugin.zip`
-2. 解压得到 `plugin` 文件夹
-3. 打开 Typora → `偏好设置` → `插件` → `打开插件文件夹`
-4. 将 `markmap` 文件夹放入插件目录
-5. 重启 Typora
+1. 安装并启用 [Typora Community Plugin](https://github.com/typora-community-plugin/typora-community-plugin) 框架。
+2. 从 [GitHub Releases](https://github.com/yjcdon/typora-plugin-markmap-plus/releases) 下载最新的 `plugin.zip`。
+3. 将包内文件解压到框架插件目录的 `util6.markmapplus` 文件夹中，覆盖旧版本。
+4. 重启 Typora，并在插件设置中启用 MarkmapPlus。
+
+本分支保留原插件 ID `util6.markmapplus`，升级时沿用已有设置；更新来源为 `yjcdon/typora-plugin-markmap-plus`。
 
 ## 👨‍💻 开发
 
