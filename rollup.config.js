@@ -10,6 +10,7 @@ import terser from '@rollup/plugin-terser'
 import typescript from '@rollup/plugin-typescript'
 import virtual from '@rollup/plugin-virtual'
 import { virtualModules } from 'rollup-plugin-typora'
+import { build } from 'esbuild'
 
 
 import strip from '@rollup/plugin-strip'
@@ -44,6 +45,21 @@ await Promise.all(woff2.map(file =>
 
 const isProduction = process.env.NODE_ENV === 'production'
 
+// HTML 导出携带独立渲染器，不依赖 Typora 或 CDN。
+const { outputFiles: [exportRuntime] } = await build({
+  stdin: {
+    contents: 'export { Markmap, deriveOptions } from "markmap-view"',
+    resolveDir: process.cwd(),
+  },
+  bundle: true,
+  write: false,
+  format: 'iife',
+  globalName: 'markmap',
+  minify: true,
+  target: 'es2018',
+  legalComments: 'inline',
+})
+
 export default defineConfig({
   input: 'src/main.ts',
   output: {
@@ -57,7 +73,10 @@ export default defineConfig({
       preventAssignment: true,
       'process.env.IS_DEV': JSON.stringify(isProduction),
     }),
-    virtual(virtualModules),
+    virtual({
+      ...virtualModules,
+      'markmap-export-runtime': `export default ${JSON.stringify(exportRuntime.text)}`,
+    }),
     nodeResolve(),
     commonjs(),
     typescript({

@@ -28,6 +28,7 @@ import { select } from 'd3-selection';
 import { logger, debounce } from '../utils';
 // 导入 interactjs 库，用于实现拖拽和调整大小功能
 import interact from 'interactjs';
+import { createInteractiveHtml, createPng, saveExport, type ExportFormat } from '../export';
 
 // ==================== 类型定义 ====================
 
@@ -231,16 +232,27 @@ const COMPONENT_STYLE = `
   /* 导出菜单样式 */
   .markmap-export-menu {
     position: absolute;                 /* 绝对定位 */
+    top: 54px;
+    right: 12px;
     background: white;                  /* 背景色为白色 */
     border: 1px solid #e0e0e0;          /* 边框 */
     border-radius: 4px;                 /* 圆角 */
     box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* 阴影 */
     z-index: 101;                       /* z-index 层级 */
     padding: 4px 0;                     /* 垂直内边距 4px */
-    min-width: 120px;                   /* 最小宽度 */
+    width: 250px;
+    max-width: calc(100% - 24px);
   }
 
+  .markmap-export-menu[hidden] { display: none; }
+  .markmap-export-title { padding: 8px 16px; font-weight: bold; }
+
   .markmap-export-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
     padding: 8px 16px;                  /* 内边距 */
     cursor: pointer;                    /* 鼠标样式为指针 */
     font-size: 14px;                    /* 字体大小 */
@@ -341,6 +353,13 @@ const COMPONENT_TEMPLATE = `
   </div>
   <div class="markmap-toc-content">
     <svg class="markmap-svg"></svg>
+  </div>
+  <div class="markmap-export-menu" role="dialog" aria-label="导出思维导图" hidden>
+    <div class="markmap-export-title">导出思维导图</div>
+    <button class="markmap-export-item" data-action="export-html">HTML · 可交互，支持黑白切换</button>
+    <button class="markmap-export-item" data-action="export-svg">SVG · 矢量图片</button>
+    <button class="markmap-export-item" data-action="export-png">PNG · 普通图片</button>
+    <button class="markmap-export-item" data-action="export-cancel">取消</button>
   </div>
 `;
 
@@ -901,7 +920,11 @@ export class TocMindmapComponent {
           case 'zoom-in': this._zoomIn(); break;              // 放大思维导图
           case 'zoom-out': this._zoomOut(); break;            // 缩小思维导图
           case 'fit': await this._fitToView(e as MouseEvent); break; // 适应视图大小
-          case 'export': this._exportMarkmap('svg'); break;   // 显示导出菜单
+          case 'export': this._setExportMenuVisible(true); break;
+          case 'export-cancel': this._setExportMenuVisible(false); break;
+          case 'export-html': await this._exportMarkmap('html'); break;
+          case 'export-svg': await this._exportMarkmap('svg'); break;
+          case 'export-png': await this._exportMarkmap('png'); break;
         }
       } catch (error) {
         // 记录按钮操作失败的日志
@@ -1421,148 +1444,89 @@ export class TocMindmapComponent {
     }, 2000);
   }
 
-  private async _exportMarkmap(format: 'svg' | 'png') {
-    // 如果组件元素不存在，则直接返回
-    if (!this.state.element) return;
+  /** 显示格式选择弹窗，选择格式后关闭。 */
+  private _setExportMenuVisible(visible: boolean) {
+    const menu = this.state.element!.querySelector('.markmap-export-menu') as HTMLElement;
+    menu.hidden = !visible;
+    if (visible) (menu.querySelector('button') as HTMLButtonElement).focus();
+  }
 
-    // 获取 SVG 元素
-    const svg = this.state.element.querySelector('.markmap-svg') as SVGSVGElement;
-    if (!svg) return;
-
+  /** 导出当前展开内容；HTML 保留折叠状态和全部节点，供独立交互。 */
+  private async _exportMarkmap(format: ExportFormat): Promise<void> {
+    this._setExportMenuVisible(false);
     try {
-      // 克隆SVG以避免影响原始显示
-      const clonedSvg = svg.cloneNode(true) as SVGSVGElement;
-
-      // 获取SVG的实际尺寸（包含所有内容的边界框）
-      const bbox = (svg as any).getBBox();
-      // 设置宽高，添加40px边距使导出更美观
-      clonedSvg.setAttribute('width', String(bbox.width + 40));
-      clonedSvg.setAttribute('height', String(bbox.height + 40));
-      // 设置viewBox，减去20px偏移以居中内容
-      clonedSvg.setAttribute('viewBox', `${bbox.x - 20} ${bbox.y - 20} ${bbox.width + 40} ${bbox.height + 40}`);
-
-      // 内联样式到SVG中，确保导出的文件样式正确
-      const styles = this._getMarkmapStyles();
-      const styleElement = document.createElementNS('http://www.w3.org/2000/svg', 'style');
-      styleElement.textContent = styles;
-      clonedSvg.insertBefore(styleElement, clonedSvg.firstChild);
-
-      // 执行下载
-      await this._downloadSvg(clonedSvg);
-    } catch (error) {
-      // 记录导出失败的日志
-      logger(`导出失败: ${error.message}`, 'error', error);
-    }
-  }
-
-  /**
-   * 获取思维导图的CSS样式
-   * 这些样式会被内联到导出的SVG文件中
-   * @returns CSS样式字符串
-   */
-  private _getMarkmapStyles(): string {
-    // 返回必要的 CSS 样式
-    return `
-      .markmap-node circle { cursor: pointer; }
-      .markmap-node text { fill: #000; font: 300 16px/20px sans-serif; }
-      .markmap-node > g { cursor: pointer; }
-      .markmap-link { fill: none; }
-    `;
-  }
-
-  /**
-   * 下载SVG文件到文件系统
-   *
-   * 保存策略：
-   * 1. 优先使用用户在设置中配置的导出目录
-   * 2. 如果未配置，则保存到当前文档所在目录
-   * 3. 如果都不可用，保存到/tmp目录
-   *
-   * macOS实现：使用bridge.callHandler执行shell命令写入文件
-   * 其他平台：降级到浏览器下载
-   *
-   * @param svg 要保存的SVG元素
-   */
-  private async _downloadSvg(svg: SVGSVGElement) {
-    const serializer = new XMLSerializer();                   // 创建 XML 序列化器
-    const svgString = serializer.serializeToString(svg);      // 将 SVG 序列化为字符串
-
-    // 确定保存目录：优先使用设置中的导出目录
-    const exportDir = this.options.exportDirectory;           // 获取导出目录
-    const currentPath = (window as any)._options?.filePath || (File as any).filePath || '';
-
-    const saveDir = exportDir||"~/Download" ;                  // 确定保存目录
-
-    // 从当前文件路径提取文件名（不含扩展名）
-    let fileName = 'markmap';
-    if (typeof currentPath === 'string' && currentPath.includes('/')) {
-      const baseName = currentPath.substring(currentPath.lastIndexOf('/') + 1);
-      fileName = baseName.replace(/\.[^.]+$/, ''); // 移除扩展名
-    } else {
-      // 降级方案：使用第一个一级标题作为文件名
-      const firstH1 = document.querySelector('h1');
-      if (firstH1) {
-        fileName = firstH1.textContent?.trim().replace(/[/\\?%*:|"<>]/g, '-') || 'markmap';
+      const markmap = this.state.markmap as Markmap;
+      const svg = this.state.element!.querySelector('.markmap-svg') as SVGSVGElement;
+      if (!markmap.state.data) throw new Error('导图没有可导出的内容');
+      let blob: Blob;
+      if (format === 'html') {
+        const root = this._getExportData(markmap.state.data);
+        const background = getComputedStyle(this.state.element!).backgroundColor;
+        const channels = background.match(/[\d.]+/g)!.slice(0, 3).map(Number);
+        const dark = channels[0] * 0.299 + channels[1] * 0.587 + channels[2] * 0.114 < 128;
+        const html = createInteractiveHtml(root, {
+          color: this.options.nodeColors,
+          colorFreezeLevel: this.options.colorFreezeLevel,
+          spacingHorizontal: this.options.spacingHorizontal,
+          spacingVertical: this.options.spacingVertical,
+          paddingX: this.options.paddingX,
+          fitRatio: this.options.fitRatio,
+          initialExpandLevel: -1,
+          duration: 0,
+        }, dark);
+        blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+      } else {
+        const exportedSvg = this._createExportSvg(svg, markmap);
+        blob = format === 'png'
+          ? await createPng(exportedSvg)
+          : new Blob([new XMLSerializer().serializeToString(exportedSvg)], { type: 'image/svg+xml;charset=utf-8' });
       }
-    }
-
-    const savePath = `${saveDir}/${fileName}.svg`;            // 构造保存路径
-
-    // 使用bridge写入文件（macOS特有）
-    if ((window as any).bridge) {
-      // 转义单引号以避免shell命令注入
-      (window as any).bridge.callHandler('controller.runCommand', {
-        args: `echo '${svgString.replace(/'/g, "'\\''")}' > '${savePath}'`, // 构造 shell 命令
-        cwd: saveDir                                                  // 设置工作目录
-      }, (result: any) => {
-        if (result[0]) {
-          logger(`✅ SVG已保存: ${savePath}`);
-          this._showToast(`SVG 已保存至: ${savePath}`, 'success');
-        } else {
-          logger(`保存失败: ${result[2]}`, 'error');
-          this._showToast('保存失败', 'error');
-        }
-      });
-    } else {
-      // 降级到浏览器下载（非macOS平台）
-      const blob = new Blob([svgString], { type: 'image/svg+xml' }); // 创建 Blob 对象
-      await this._triggerDownload(blob, `${fileName}.svg`);         // 触发下载
-      logger(`✅ SVG已下载到浏览器下载目录`);
-      this._showToast(`SVG 已下载: ${fileName}.svg`, 'success');
+      const destination = await saveExport(blob, format, this.options.exportDirectory);
+      this._showToast(`${format.toUpperCase()} 已保存至：${destination}`, 'success');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      logger(`导出失败：${message}`, 'error', error);
+      this._showToast(`导出失败：${message}`, 'error');
+      throw error;
     }
   }
 
-  /**
-   * 触发浏览器文件下载（降级方案）
-   *
-   * 当bridge API不可用时使用此方法
-   * 通过创建临时<a>标签并模拟点击来触发下载
-   *
-   * @param blob 要下载的文件数据
-   * @param filename 文件名
-   * @returns Promise，在下载开始后resolve
-   */
-  private async _triggerDownload(blob: Blob, filename: string): Promise<void> {
-    return new Promise((resolve) => {
-      // 创建临时URL
-      const url = URL.createObjectURL(blob);
-      // 创建隐藏的下载链接
-      const a = document.createElement('a');
-      a.href = url;                                             // 设置链接地址
-      a.download = filename;                                    // 设置下载文件名
-      a.style.display = 'none';                                 // 隐藏链接
-      document.body.appendChild(a);                             // 添加到页面
+  /** 去掉运行时布局信息，仅保留 HTML 渲染所需的内容和折叠状态。 */
+  private _getExportData(node: IPureNode): IPureNode {
+    return {
+      content: node.content,
+      payload: { fold: node.payload?.fold || 0 },
+      children: node.children?.map(child => this._getExportData(child)),
+    };
+  }
 
-      // 触发下载
-      a.click();
-
-      // 延迟清理，确保下载已开始
-      setTimeout(() => {
-        document.body.removeChild(a);                           // 移除链接元素
-        URL.revokeObjectURL(url);                               // 释放临时URL
-        resolve();                                              // 解析 Promise
-      }, 100);
-    });
+  /** 按完整内容范围导出，解除窗口缩放、平移，并固化当前主题颜色。 */
+  private _createExportSvg(svg: SVGSVGElement, markmap: Markmap): SVGSVGElement {
+    const clone = svg.cloneNode(true) as SVGSVGElement;
+    const group = clone.querySelector('g')!;
+    const bbox = markmap.g.node()!.getBBox();
+    if (!bbox.width || !bbox.height) throw new Error('导图尚未渲染，请稍后再导出');
+    group.removeAttribute('transform');
+    const width = Math.ceil(bbox.width + 40);
+    const height = Math.ceil(bbox.height + 40);
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    clone.setAttribute('width', String(width));
+    clone.setAttribute('height', String(height));
+    clone.setAttribute('viewBox', `${bbox.x - 20} ${bbox.y - 20} ${width} ${height}`);
+    const computed = getComputedStyle(svg);
+    for (const property of ['--markmap-text-color', '--markmap-circle-open-bg', '--markmap-font', '--markmap-a-color', '--markmap-code-bg', '--markmap-code-color']) {
+      clone.style.setProperty(property, computed.getPropertyValue(property));
+    }
+    clone.style.width = `${width}px`;
+    clone.style.height = `${height}px`;
+    const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    background.setAttribute('x', String(bbox.x - 20));
+    background.setAttribute('y', String(bbox.y - 20));
+    background.setAttribute('width', String(width));
+    background.setAttribute('height', String(height));
+    background.setAttribute('fill', getComputedStyle(this.state.element!).backgroundColor);
+    clone.insertBefore(background, group);
+    return clone;
   }
 
   /**
