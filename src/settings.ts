@@ -237,7 +237,7 @@ export class MarkmapSettingTab extends SettingTab {
     // 滚动偏移量设置
     this.addSetting(item => {
       item.addName('跳转滚动偏移')
-      item.addDescription('点击思维导图节点跳转时，标题距离视窗顶部的像素距离')
+      item.addDescription('点击思维导图节点跳转时，对应正文块距离编辑区顶部的像素距离')
       item.addInput('number', (input) => {
         const config = SETTING_CONSTRAINTS.scrollOffsetTop
         input.value = this.settings.get('scrollOffsetTop').toString()
@@ -254,8 +254,8 @@ export class MarkmapSettingTab extends SettingTab {
 
     // 文档标题高亮颜色设置
     this.addSetting(item => {
-      item.addName('文档标题高亮颜色')
-      item.addDescription("点击思维导图节点后，内容窗口中对应标题的背景高亮颜色。支持所有CSS颜色格式，包括渐变 (例如 'gold', '#FFD700', 'linear-gradient(90deg, red, blue)')。")
+      item.addName('正文块高亮颜色')
+      item.addDescription("点击思维导图节点后，正文中对应标题或列表项的背景高亮颜色。支持所有CSS颜色格式，包括渐变 (例如 'gold', '#FFD700', 'linear-gradient(90deg, red, blue)')。")
       item.addInput('text', (input) => {
         const config = SETTING_CONSTRAINTS.headingHighlightColor
         input.value = this.settings.get('headingHighlightColor')

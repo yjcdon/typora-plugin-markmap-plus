@@ -39,23 +39,28 @@ import { createInteractiveHtml, createPng, saveExport, type ExportFormat } from 
 export interface IEditorAdapter {
   /** 获取 Markdown 内容 */
   getMarkdown(): string;
+  /** 按正文顺序获取可定位的标题、段落和列表项正文块。 */
+  getBlockRefs(): BlockRef[];
   /** 获取文档中的标题引用 */
   getHeadingRefs?(): HeadingRef[];
   /** 通过稳定标题 ID 解析当前 DOM 元素 */
-  resolveHeadingElement?(id: string): HTMLElement | null;
-  /** 滚动到指定标题 */
-  scrollToHeading?(id: string, options: { offsetTop: number; highlightClassName: string; highlightDuration: number }): HTMLElement | null;
+  resolveBlockElement?(id: string): HTMLElement | null;
+  /** 滚动到节点对应的正文块。 */
+  scrollToBlock?(id: string, options: { offsetTop: number; highlightClassName: string; highlightDuration: number }): HTMLElement | null;
   /** 获取当前视口中最合适的标题 ID */
   getCurrentVisibleHeadingId?(viewportOffset: number): string | null;
   /** 将相对路径转换为绝对路径 */
   resolveImagePath(src: string): string;
 }
 
-export interface HeadingRef {
+export interface BlockRef {
   id: string;
   text: string;
-  level: number;
   element?: HTMLElement;
+}
+
+export interface HeadingRef extends BlockRef {
+  level: number;
 }
 
 /**
@@ -131,7 +136,7 @@ export const DEFAULT_TOC_OPTIONS: TocMindmapOptions = {
   enableRealTimeUpdate: true,   // 默认启用实时更新
   keepFoldStateWhenUpdate: true,// 默认在更新时保持节点折叠状态
   autoFitWhenUpdate: false,     // 默认在更新时不自动适应视图
-  scrollOffsetTop: 80,          // 默认滚动偏移为 80 像素
+  scrollOffsetTop: 0,           // 默认将点击的正文块对齐到编辑区顶部
   headingHighlightColor: 'rgba(255, 215, 0, 0.5)', // 默认标题高亮颜色为金色半透明
   nodeHighlightColor: 'rgba(142, 110, 255, 0.7)',  // 默认节点高亮颜色为紫色半透明
   highlightDuration: 1500,      // 默认高亮持续时间为 1500 毫秒
@@ -504,6 +509,8 @@ export class TocMindmapComponent {
     headingElements: new Map<string, HTMLElement>(),
     /** 从 state.path 到稳定标题 ID */
     headingIds: new Map<string, string>(),
+    /** 所有可定位节点的路径到正文块 ID，正文节点绑定自身。 */
+    nodeIds: new Map<string, string>(),
     /** 双向索引：从 HTMLElement 到 state.path */
     elementToPath: new Map<HTMLElement, string>(),
     /** 是否固定到右侧 */
@@ -609,6 +616,7 @@ export class TocMindmapComponent {
     this.state.lastHeadingsHash = '';     // 重置标题哈希值
     this.state.headingElements.clear();   // 清空路径到元素的映射
     this.state.headingIds.clear();        // 清空路径到标题 ID 的映射
+    this.state.nodeIds.clear();
     this.state.elementToPath.clear();     // 清空元素到路径的映射
     this.state.isPinRight = false;        // 重置固定状态
     this.state.isPinLeft = false;         // 重置固定状态
@@ -945,7 +953,7 @@ export class TocMindmapComponent {
     while (nodeEl && nodeEl !== this.state.element) {
       // 如果元素包含 markmap-node 类，则认为是节点
       if (nodeEl.classList?.contains('markmap-node')) {
-        this._scrollToHeadingByNode(nodeEl);                  // 滚动到对应标题
+        this._scrollToBlockByNode(nodeEl);                    // 滚动到节点自身的正文块
         return;
       }
       nodeEl = nodeEl.parentElement;                          // 向上查找父元素
@@ -962,11 +970,12 @@ export class TocMindmapComponent {
     if (!this.state.element) return;
 
     const headingRefs = this._getHeadingRefs();               // 获取文档中的标题引用
+    const blockRefs = this.editorAdapter.getBlockRefs();
     let markdownContent = this.editorAdapter.getMarkdown();
     // 标题块 ID 可能在切换文档或重新解析时变化，即使 Markdown 相同也要更新映射。
     const headingSignature = headingRefs.map(({ id, text, level }) => [id, text, level]);
     const contentHash = this.options.initialExpandLevel === 6
-      ? JSON.stringify([markdownContent, headingSignature])
+      ? JSON.stringify([markdownContent, headingSignature, blockRefs.map(({ id, text }) => [id, text])])
       : JSON.stringify(headingSignature);
 
     // 如果内容哈希值未变化，则直接返回
@@ -1020,7 +1029,7 @@ export class TocMindmapComponent {
     }
 
     // setData 在首次 await 前已生成路径，立即同步当前数据，避免点击读到旧映射。
-    this._syncMapsAfterRender(this.state.markmap.state.data, headingRefs);
+    this._syncMapsAfterRender(this.state.markmap.state.data, headingRefs, blockRefs);
   }
 
   // --- 工具方法：标题处理 ---
@@ -1063,22 +1072,22 @@ export class TocMindmapComponent {
     return this._getFallbackHeadingRefs();
   }
 
-  private _resolveHeadingElement(id: string): HTMLElement | null {
-    const resolved = this.editorAdapter.resolveHeadingElement?.(id);
+  private _resolveBlockElement(id: string): HTMLElement | null {
+    const resolved = this.editorAdapter.resolveBlockElement?.(id);
     if (resolved) return resolved;
-    const ref = this._getHeadingRefs().find(item => item.id === id);
+    const ref = this.editorAdapter.getBlockRefs().find(item => item.id === id);
     return ref?.element || null;
   }
 
-  private _scrollToHeading(id: string): HTMLElement | null {
-    const resolved = this.editorAdapter.scrollToHeading?.(id, {
+  private _scrollToBlock(id: string): HTMLElement | null {
+    const resolved = this.editorAdapter.scrollToBlock?.(id, {
       offsetTop: this.options.scrollOffsetTop,
       highlightClassName: 'markmap-highlight',
       highlightDuration: this.options.highlightDuration,
     });
     if (resolved) return resolved;
 
-    const element = this._resolveHeadingElement(id);
+    const element = this._resolveBlockElement(id);
     if (!element) return null;
 
     const originalMargin = element.style.scrollMarginTop;
@@ -1106,7 +1115,7 @@ export class TocMindmapComponent {
     let maxLevel = 0;
 
     for (const heading of headingRefs) {
-      const element = heading.element || this._resolveHeadingElement(heading.id);
+      const element = heading.element || this._resolveBlockElement(heading.id);
       if (!element) continue;
       const elementTop = element.getBoundingClientRect().top + window.scrollY;
       if (elementTop >= viewportTop - this.options.viewportOffset && elementTop <= viewportBottom) {
@@ -1122,7 +1131,7 @@ export class TocMindmapComponent {
     let closestHeading: HeadingRef | null = null;
     let minDistance = Infinity;
     for (const heading of headingRefs) {
-      const element = heading.element || this._resolveHeadingElement(heading.id);
+      const element = heading.element || this._resolveBlockElement(heading.id);
       if (!element) continue;
       const elementTop = element.getBoundingClientRect().top + window.scrollY;
       const distance = Math.abs(elementTop - viewportTop);
@@ -1136,17 +1145,15 @@ export class TocMindmapComponent {
   }
 
   /**
-   * 处理思维导图节点点击跳转到对应标题
+   * 点击文字时定位节点自身的正文块，不回退到父级标题。
    * @param nodeEl 节点元素
    */
-  private _scrollToHeadingByNode(nodeEl: Element) {
+  private _scrollToBlockByNode(nodeEl: Element) {
     const node = (nodeEl as Element & { __data__: INode }).__data__;
-    // Markmap 节点没有 parent 引用；路径包含层级，从自身向上找最近标题。
-    const paths = [...this._getAncestorPaths(node.state.path), node.state.path].reverse();
-    const headingPath = paths.find(path => this.state.headingIds.has(path));
-    // 无标题的文档或虚拟根节点没有可跳转目标。
-    if (!headingPath) return;
-    this._scrollToHeading(this.state.headingIds.get(headingPath)!);
+    const blockId = this.state.nodeIds.get(node.state.path);
+    // 虚拟根没有正文块；未映射的内容也不能跳到其他节点。
+    if (!blockId) return;
+    this._scrollToBlock(blockId);
   }
 
   //----------------思维导图节点处理相关方法---------------------
@@ -1174,16 +1181,20 @@ export class TocMindmapComponent {
   }
 
   /**
-   * 将真实标题节点（包括根标题）按文档顺序绑定到 Typora 标题 ID。
-   * 正文和虚拟根不参与匹配；同名标题依靠出现顺序区分。
+   * 按文档顺序绑定标题和正文自身的块 ID，同名内容依靠出现顺序区分。
+   * 正文只在当前标题范围内匹配，避免跳到其他章节的同名段落；虚拟根没有块 ID。
    * @param root setData 初始化路径后的节点树
    * @param headingRefs 按文档顺序采集的标题引用
+   * @param blockRefs 按正文顺序采集的标题和段落引用
    */
-  private _syncMapsAfterRender(root: INode, headingRefs: HeadingRef[]): void {
+  private _syncMapsAfterRender(root: INode, headingRefs: HeadingRef[], blockRefs: BlockRef[]): void {
     this.state.headingElements.clear();
     this.state.headingIds.clear();
+    this.state.nodeIds.clear();
     this.state.elementToPath.clear();
     let nextHeadingIndex = 0;
+    let nextBlockIndex = 0;
+    const headingIdSet = new Set(headingRefs.map(heading => heading.id));
     const visit = (node: INode) => {
       const tag = node.payload?.tag;
       if (typeof tag === 'string' && /^h[1-6]$/.test(tag)) {
@@ -1195,11 +1206,22 @@ export class TocMindmapComponent {
           const heading = headingRefs[index];
           const path = node.state.path;
           this.state.headingIds.set(path, heading.id);
+          this.state.nodeIds.set(path, heading.id);
+          nextBlockIndex = blockRefs.findIndex(block => block.id === heading.id) + 1;
           if (heading.element) {
             this.state.headingElements.set(path, heading.element);
             this.state.elementToPath.set(heading.element, path);
           }
           nextHeadingIndex = index + 1;
+        }
+      } else if (node.content) {
+        const text = this._getNodeText(node);
+        const nextHeadingBlockIndex = blockRefs.findIndex((block, i) => i >= nextBlockIndex && headingIdSet.has(block.id));
+        const sectionEnd = nextHeadingBlockIndex < 0 ? blockRefs.length : nextHeadingBlockIndex;
+        const index = blockRefs.findIndex((block, i) => i >= nextBlockIndex && i < sectionEnd && block.text === text);
+        if (index >= 0) {
+          this.state.nodeIds.set(node.state.path, blockRefs[index].id);
+          nextBlockIndex = index + 1;
         }
       }
       node.children.forEach(visit);
@@ -1653,7 +1675,7 @@ export class TocMindmapComponent {
     if (isUserClick) {
       const currentHeadingId = this._getCurrentVisibleHeadingId();
       const currentElement = currentHeadingId
-        ? this._resolveHeadingElement(currentHeadingId)
+        ? this._resolveBlockElement(currentHeadingId)
         : null;
 
       logger('进入 _fitToView，开始适应视图。')

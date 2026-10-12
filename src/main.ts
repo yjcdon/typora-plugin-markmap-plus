@@ -21,7 +21,7 @@ import { loadCSS, loadJS } from 'markmap-view'
 import { logger } from './utils'
 import { MarkmapSettings, DEFAULT_SETTINGS, MarkmapSettingTab } from './settings'
 // 导入我们新建的组件
-import { TocMindmapComponent, IEditorAdapter, TocMindmapOptions, DEFAULT_TOC_OPTIONS, HeadingRef } from './components/TocMindmap'
+import { TocMindmapComponent, IEditorAdapter, TocMindmapOptions, DEFAULT_TOC_OPTIONS, HeadingRef, BlockRef } from './components/TocMindmap'
 import { FloatingButtonComponent, FloatingButtonOptions, DEFAULT_FLOATING_BUTTON_OPTIONS } from './components/FloatingButton'
 
 const LEGACY_PLUGIN_IDS = [
@@ -52,15 +52,31 @@ class TyporaAdapter implements IEditorAdapter {
     }));
   }
 
-  resolveHeadingElement(id: string): HTMLElement | null {
+  /** 采集每个标题和段落自身的块 ID，列表项使用其内部段落，不包含子列表文字。 */
+  getBlockRefs(): BlockRef[] {
+    const headings = new Map(this.getHeadingRefs().map(heading => [heading.id, heading]));
+    return Array.from(document.querySelectorAll<HTMLElement>('#write [mdtype="heading"][cid], #write [mdtype="paragraph"][cid]'))
+      .map(element => {
+        const id = element.getAttribute('cid')!;
+        const heading = headings.get(id);
+        if (heading) return heading;
+        const parsed = document.createElement('div');
+        parsed.innerHTML = editor.brush.inline.output(editor.getNode(id).get('text'));
+        // Typora 的编辑渲染器包含 Markdown 分隔符，正文匹配只使用显示内容。
+        parsed.querySelectorAll('.md-meta').forEach(marker => marker.remove());
+        return { id, text: (parsed.textContent || '').trim(), element };
+      });
+  }
+
+  resolveBlockElement(id: string): HTMLElement | null {
     const write = document.querySelector('#write');
     if (!write) return null;
     return write.querySelector(`[cid="${id}"]`) as HTMLElement | null;
   }
 
   /** 点击节点文字时立即定位正文，保留短暂的静态位置提示。 */
-  scrollToHeading(id: string, options: { offsetTop: number; highlightClassName: string; highlightDuration: number }): HTMLElement | null {
-    const element = this.resolveHeadingElement(id);
+  scrollToBlock(id: string, options: { offsetTop: number; highlightClassName: string; highlightDuration: number }): HTMLElement | null {
+    const element = this.resolveBlockElement(id);
     if (!element) return null;
 
     const originalMargin = element.style.scrollMarginTop;
@@ -86,7 +102,7 @@ class TyporaAdapter implements IEditorAdapter {
     let maxLevel = 0;
 
     for (const heading of headingRefs) {
-      const element = heading.element || this.resolveHeadingElement(heading.id);
+      const element = heading.element || this.resolveBlockElement(heading.id);
       if (!element) continue;
       const rect = element.getBoundingClientRect();
       const elementTop = rect.top + window.scrollY;
@@ -104,7 +120,7 @@ class TyporaAdapter implements IEditorAdapter {
     let closestHeading: HeadingRef | null = null;
     let minDistance = Infinity;
     for (const heading of headingRefs) {
-      const element = heading.element || this.resolveHeadingElement(heading.id);
+      const element = heading.element || this.resolveBlockElement(heading.id);
       if (!element) continue;
       const rect = element.getBoundingClientRect();
       const elementTop = rect.top + window.scrollY;
