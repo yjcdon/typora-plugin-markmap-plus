@@ -10,7 +10,7 @@ import exportRuntime from 'markmap-export-runtime';
 
 export type ExportFormat = 'html' | 'svg' | 'png';
 
-/** 生成携带数据和 Markmap 渲染器的 HTML；右上角可切换黑白背景。 */
+/** 生成携带数据和 Markmap 渲染器的 HTML；右上角可缩放导图、切换黑白背景。 */
 export function createInteractiveHtml(root: IPureNode, options: Partial<IMarkmapJSONOptions>, dark: boolean): string {
   const data = JSON.stringify({ root, options }).replace(/</g, '\\u003c');
   const runtime = exportRuntime.replace(/<\/script/gi, '<\\/script');
@@ -26,6 +26,9 @@ html[data-theme="dark"] { --bg: #363b40; --text: #b8bfc6; --hover: #70717d; colo
 html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); }
 #mindmap { display: block; width: 100%; height: 100%; }
 #mindmap.markmap { --markmap-text-color: var(--text); --markmap-circle-open-bg: var(--bg); }
+/* 测量容器不接收点击，避免遮挡右侧节点；实际内容仍可交互。 */
+.markmap-foreign > div { pointer-events: none; }
+.markmap-foreign > div > div { pointer-events: auto; }
 #controls { position: fixed; right: 16px; top: 16px; z-index: 1; display: flex; gap: 8px; }
 button { background: var(--bg); color: var(--text); border: 1px solid currentColor; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
 button:hover { background: var(--hover); }
@@ -33,12 +36,13 @@ button:hover { background: var(--hover); }
 </head>
 <body>
 <svg id="mindmap"></svg>
-<div id="controls"><button id="fit" type="button">适应视图</button><button id="theme" type="button" aria-label="切换黑白背景"></button></div>
+<div id="controls"><button id="zoom-in" type="button" title="放大" aria-label="放大">＋</button><button id="zoom-out" type="button" title="缩小" aria-label="缩小">−</button><button id="fit" type="button">适应视图</button><button id="theme" type="button" aria-label="切换黑白背景"></button></div>
 <script id="markmap-data" type="application/json">${data}</script>
 <script>${runtime}</script>
 <script>
 const data = JSON.parse(document.getElementById('markmap-data').textContent);
 const mm = markmap.Markmap.create('#mindmap', markmap.deriveOptions(data.options), data.root);
+mm.svg.on('dblclick.zoom', null);
 const themeButton = document.getElementById('theme');
 function updateThemeButton() {
   const dark = document.documentElement.dataset.theme === 'dark';
@@ -49,6 +53,8 @@ themeButton.onclick = () => {
   document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   updateThemeButton();
 };
+document.getElementById('zoom-in').onclick = () => mm.rescale(1.2);
+document.getElementById('zoom-out').onclick = () => mm.rescale(1 / 1.2);
 document.getElementById('fit').onclick = () => mm.fit();
 window.addEventListener('resize', () => mm.fit());
 updateThemeButton();

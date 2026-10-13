@@ -191,6 +191,15 @@ const COMPONENT_STYLE = `
     user-select: none;                  /* 禁止用户选择文本 */
   }
 
+  /* Markmap 的测量容器宽达 9999px，WebKit 会让它遮住右侧子节点的点击区域。
+     仅实际文字参与命中，保留内层链接和圆点的交互。 */
+  .markmap-toc-modal .markmap-foreign > div {
+    pointer-events: none;
+  }
+  .markmap-toc-modal .markmap-foreign > div > div {
+    pointer-events: auto;
+  }
+
   /* TOC 弹窗头部样式 */
   .markmap-toc-header {
     padding: 10px;                      /* 内边距 10px */
@@ -835,72 +844,29 @@ export class TocMindmapComponent {
     this._eventCleanupFunctions = [];                         // 清空清理函数数组
   }
 
-  private _getNonCodeMarkdownLines(markdownContent: string): string[] {
-    const lines = markdownContent.split('\n');
-    const result: string[] = [];
-    let inFenceBlock = false;
-    let fenceMarker = '';
-
-    for (const line of lines) {
-      const fenceMatch = line.match(/^(\s*)(`{3,}|~{3,})(.*)$/);
-      // 深层列表也会缩进四个空格以上，不能把列表项当作代码丢弃。
-      const isIndentedCodeLine = !inFenceBlock && /^( {4,}|\t)/.test(line)
-        && !/^\s*(?:[-+*]|\d+[.)])\s+/.test(line);
-
-      if (fenceMatch) {
-        const marker = fenceMatch[2][0];
-        if (!inFenceBlock) {
-          inFenceBlock = true;
-          fenceMarker = marker;
-        } else if (marker === fenceMarker) {
-          inFenceBlock = false;
-          fenceMarker = '';
-        }
-        continue;
-      }
-
-      if (inFenceBlock || isIndentedCodeLine) {
-        continue;
-      }
-
-      result.push(line);
-    }
-
-    return result;
-  }
-
   /**
-   * 预处理 Markdown，避免代码块内容被错误识别为思维导图节点
+   * 按 Markdown 块类型过滤代码，并将顶层段落转换为同级列表节点。
+   * 保留原有列表缩进和段落续行，不按标题深度缩进，避免正文被解析成代码块。
    */
   private _preprocessMarkdownForMarkmap(markdownContent: string): string {
-    const lines = this._getNonCodeMarkdownLines(markdownContent);
+    const lines = markdownContent.split('\n');
+    const tokens = this.transformer.md.parse(markdownContent, {});
+    const headingsOnly = this.options.initialExpandLevel <= 5;
+    const result = headingsOnly ? lines.map(() => '') : [...lines];
 
-    if (this.options.initialExpandLevel <= 5) {
-      return lines
-        .filter(line => /^#{1,6}\s/.test(line))
-        .join('\n');
-    }
-
-    const result: string[] = [];
-    let currentLevel = 0;
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      const headingMatch = line.match(/^(#{1,6})\s/);
-
-      if (headingMatch) {
-        currentLevel = headingMatch[1].length;
-        result.push(line);
-        continue;
+    for (const token of tokens) {
+      if (!token.map) continue;
+      const [start, end] = token.map;
+      if (headingsOnly) {
+        if (token.type === 'heading_open') {
+          for (let i = start; i < end; i++) result[i] = lines[i];
+        }
+      } else if (token.type === 'fence' || token.type === 'code_block') {
+        for (let i = start; i < end; i++) result[i] = '';
+      } else if (token.type === 'paragraph_open' && token.level === 0) {
+        result[start] = `- ${lines[start]}`;
+        for (let i = start + 1; i < end; i++) result[i] = `  ${lines[i]}`;
       }
-
-      if (trimmed && !line.startsWith(' ') && !line.startsWith('-') && !line.startsWith('*')) {
-        const indent = '  '.repeat(currentLevel);
-        result.push(`${indent}- ${line}`);
-        continue;
-      }
-
-      result.push(line);
     }
 
     return result.join('\n');
