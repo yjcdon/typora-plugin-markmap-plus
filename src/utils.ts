@@ -35,7 +35,7 @@ const DEBUG_CONFIG = {
   enabled: true,
   
   /** 是否在页面中显示日志（macOS 默认开启） */
-  showInPage: isMacOS(),
+  showInPage: false,
   
   /** 是否显示时间戳 */
   showTimestamp: true,
@@ -473,14 +473,18 @@ export function getDebugInfo() {
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
-): ((...args: any[]) => void) {
+): ((...args: Parameters<T>) => void) & { cancel(): void } {
   let timeout: number | undefined;
-
-  return function(this: ThisParameterType<T>, ...args: any[]) {
-    const context = this;
+  const debounced = function(this: ThisParameterType<T>, ...args: Parameters<T>) {
     clearTimeout(timeout);
     timeout = window.setTimeout(() => {
-      func.apply(context, args);
+      timeout = undefined;
+      func.apply(this, args);
     }, wait);
   };
+  debounced.cancel = () => {
+    clearTimeout(timeout);
+    timeout = undefined;
+  };
+  return debounced;
 }

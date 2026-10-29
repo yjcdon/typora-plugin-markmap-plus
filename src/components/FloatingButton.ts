@@ -91,6 +91,7 @@ export class FloatingButtonComponent {
 
   /** 组件配置选项 */
   private options: FloatingButtonOptions;
+  private dragResetTimer: number | undefined;
 
   /**
    * 构造函数
@@ -203,6 +204,8 @@ export class FloatingButtonComponent {
   public hide = () => {
     if (!this.state.element) return;
 
+    clearTimeout(this.dragResetTimer);
+    this.dragResetTimer = undefined;
     // 清理拖拽功能
     interact(this.state.element).unset();
     
@@ -257,7 +260,10 @@ export class FloatingButtonComponent {
     // 创建按钮容器
     const container = document.createElement('div');
     container.className = 'markmap-floating-button';
-    container.title = '显示/隐藏目录思维导图 (Cmd+M)';
+    container.title = '显示/隐藏目录思维导图';
+    container.setAttribute('role', 'button');
+    container.setAttribute('aria-label', '显示/隐藏目录思维导图');
+    container.tabIndex = 0;
     container.attachShadow({ mode: 'open' });
 
     // 添加到页面body中
@@ -343,10 +349,20 @@ export class FloatingButtonComponent {
     // 监听拖拽结束事件
     interact(this.state.element).on('dragend', () => {
       // 延迟重置标志，避免拖拽结束后立即触发点击
-      setTimeout(() => { isDragging = false; }, 0);
+      clearTimeout(this.dragResetTimer);
+      this.dragResetTimer = window.setTimeout(() => {
+        this.dragResetTimer = undefined;
+        isDragging = false;
+      }, 0);
     });
     
     // 监听点击事件
+    this.state.element.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.onClick();
+      }
+    });
     this.state.element.addEventListener('click', (e) => {
       // 只有在非拖拽状态下才触发点击回调
       if (!isDragging) {
