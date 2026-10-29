@@ -1,4 +1,4 @@
-/** Typora 页面原生能力；由独立加载器在编辑器就绪后加载。 @author liangyujia-ai */
+/** Typora 页面原生能力；由独立加载器在编辑器就绪后加载。 */
 import type * as Typora from 'typora';
 
 const host = window as unknown as typeof Typora;

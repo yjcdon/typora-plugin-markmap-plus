@@ -1,4 +1,4 @@
-/** 当前窗口唯一启动入口；编辑器就绪后加载独立程序。@author liangyujia-ai */
+/** 当前窗口唯一启动入口；编辑器就绪后加载独立程序。 */
 (() => {
   const key = '__markmapPlus';
   if (window[key]) return;

@@ -1,4 +1,4 @@
-/** 独立插件初始化与当前窗口资源所有权。@author liangyujia-ai */
+/** 独立插件初始化与当前窗口资源所有权。 */
 import { TyporaAdapter } from './editor-adapter';
 import { readSettings, writeSettings } from './platform';
 import { SettingsStore } from './settings-store';

@@ -1,4 +1,4 @@
-/** Typora 正文与导图之间的定位适配。@author liangyujia-ai */
+/** Typora 正文与导图之间的定位适配。 */
 import { editor, File } from "./typora";
 import type { IEditorAdapter, HeadingRef, BlockRef } from "./components/TocMindmap";
 

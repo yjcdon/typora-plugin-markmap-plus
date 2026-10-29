@@ -1,4 +1,4 @@
-/** 独立插件构建；旧产物进入系统废纸篓。@author liangyujia-ai */
+/** 独立插件构建；旧产物进入系统废纸篓。 */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';

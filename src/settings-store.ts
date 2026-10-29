@@ -1,4 +1,4 @@
-/** 独立设置存储：校验持久化边界，保存成功后发布变更。 @author liangyujia-ai */
+/** 独立设置存储：校验持久化边界，保存成功后发布变更。 */
 import { DEFAULT_SETTINGS, SETTING_GROUPS, type MarkmapSettings } from './settings';
 
 export interface SettingsStorage {

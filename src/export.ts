@@ -1,6 +1,5 @@
 /**
  * 思维导图文件导出：独立 HTML、完整 SVG 和 PNG。
- * @author liangyujia-ai
  */
 import { path, writeFileAtomic, readLocalImageDataUrl } from './platform';
 import { File, _options } from './typora';

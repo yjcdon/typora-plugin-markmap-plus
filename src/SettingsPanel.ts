@@ -1,4 +1,4 @@
-/** 独立设置面板：按分组编辑，明确保存，关闭时释放 DOM。 @author liangyujia-ai */
+/** 独立设置面板：按分组编辑，明确保存，关闭时释放 DOM。 */
 import { DEFAULT_SETTINGS, SETTING_GROUPS, type MarkmapSettings, type SettingField } from './settings';
 import { SettingsStore } from './settings-store';
 

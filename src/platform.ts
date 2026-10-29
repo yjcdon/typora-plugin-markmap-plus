@@ -1,4 +1,4 @@
-/** 独立插件的平台文件能力与配置存储。 @author liangyujia-ai */
+/** 独立插件的平台文件能力与配置存储。 */
 import { File, _options, bridge, reqnode, JSBridge } from './typora';
 
 interface PathAdapter {
