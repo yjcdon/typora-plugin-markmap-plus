@@ -1,0 +1,11 @@
+{
+  "pluginVersion": "2.0.0",
+  "zipEntries": 71,
+  "bundledDependencyLicenses": 35,
+  "zipSha256": "8bc2dc6f5862a91a0b2bb59e3a5a8c8a833cac7528efda5f212810b9b80863f6",
+  "programSha256": "5f29367024efebc66b06810b592e991212766327eed7d8551035f59a690cbd7f",
+  "loaderSha256": "b82ee515606cf24fd2e6b532a3c20a3de23178d10ea8f1ccc71b77e761e4376b",
+  "installedProgramAndLoaderMatch": true,
+  "zipMatchesBuildFiles": true,
+  "originalFrameworkDirectoryExists": false
+}

@@ -19,4 +19,4 @@ class Demo {}
 
 ## 第一章节
 
-这是重复标题下的另一段正文。 LIVE-UPDATE
+这是重复标题下的另一段正文。 LIVE-UPDATE FOLD-UPDATE

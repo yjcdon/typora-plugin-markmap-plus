@@ -1,0 +1,9 @@
+{
+  "execution": "Node VM with controlled document and clock; actual src/loader.js",
+  "duplicateLoad": true,
+  "readinessTimeout": true,
+  "disposeDuringLoad": true,
+  "readyAndDispose": true,
+  "remainingTimers": 0,
+  "remainingWindowListeners": 0
+}

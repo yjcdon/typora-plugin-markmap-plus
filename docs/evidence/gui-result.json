@@ -1,0 +1,23 @@
+{
+  "system": "macOS 27.2 arm64",
+  "typora": "1.12.3",
+  "plugin": "2.0.0",
+  "twoNativeWindows": true,
+  "widthAtoB": 540,
+  "widthBtoA": 520,
+  "repeatedHeadingTargetCorrect": true,
+  "foldRetainedAfterEdit": true,
+  "windowDrag": true,
+  "windowResizeLeftEdge": true,
+  "zoom": true,
+  "fitFocus": true,
+  "pinRightAndRestore": true,
+  "missingExportDirectoryErrorVisible": true,
+  "htmlRetrySucceeded": true,
+  "htmlBytes": 1544245,
+  "htmlAllNodes": 11,
+  "htmlFoldedNodes": 1,
+  "htmlWebKitErrors": [],
+  "htmlMathInsideNode": true,
+  "htmlThemeAndZoom": true
+}

@@ -26,7 +26,7 @@ await trash('plugin.zip');
 await fs.mkdir(path.join(out, 'app'), { recursive: true });
 const runtime = await build({
   stdin: { contents: 'export { Markmap, deriveOptions } from "markmap-view"', resolveDir: process.cwd() },
-  bundle: true, write: false, format: 'iife', globalName: 'markmap', minify: true, target: 'es2018', legalComments: 'inline',
+  bundle: true, write: false, metafile: true, format: 'iife', globalName: 'markmap', minify: true, target: 'es2018', legalComments: 'inline',
 });
 let exportStyle = await fs.readFile('node_modules/katex/dist/katex.min.css', 'utf8');
 // 导出 HTML/SVG 携带字体，文件移动后仍可离线展示公式。
@@ -37,10 +37,10 @@ for (const fontUrl of fontUrls) {
   exportStyle = exportStyle.replaceAll(`url(${fontUrl})`, `url(data:${mime};base64,${bytes.toString('base64')})`);
 }
 exportStyle += await fs.readFile('node_modules/highlight.js/styles/default.min.css', 'utf8');
-await build({
+const main = await build({
   entryPoints: ['src/main.ts'], outfile: path.join(out, 'app/main.js'), bundle: true,
   format: 'iife', globalName: 'MarkmapPlusRuntime', target: 'es2018', minify: production,
-  sourcemap: production ? false : 'linked', legalComments: 'linked',
+  sourcemap: production ? false : 'linked', legalComments: 'linked', metafile: true,
   plugins: [{ name: 'standalone-resources', setup(builder) {
     // Node 版转换器将公式与语法高亮实现直接打入产物，运行时使用本地 CSS。
     builder.onResolve({ filter: /^markmap-lib$/ }, () => ({ path: path.resolve('node_modules/markmap-lib/dist/index.mjs') }));
@@ -52,14 +52,31 @@ await build({
 await fs.copyFile('src/loader.js', path.join(out, 'loader.js'));
 await fs.copyFile('src/manifest.json', path.join(out, 'manifest.json'));
 await fs.copyFile('INSTALL.md', path.join(out, 'INSTALL.md'));
+await fs.copyFile('src/NOTICE.md', path.join(out, 'NOTICE.md'));
 await fs.copyFile('node_modules/katex/dist/katex.min.css', path.join(out, 'app/katex.css'));
 await fs.cp('node_modules/katex/dist/fonts', path.join(out, 'app/fonts'), { recursive: true });
 await fs.copyFile('node_modules/highlight.js/styles/default.min.css', path.join(out, 'app/highlight.css'));
+// 根据实际打入程序的依赖收集许可，包含转换器和导出渲染器的传递依赖。
+const packages = new Map();
+const bundledInputs = [main, runtime].flatMap(result => Object.values(result.metafile.outputs)
+  .flatMap(output => Object.entries(output.inputs).filter(([, info]) => info.bytesInOutput > 0).map(([name]) => name)));
+for (const input of new Set(bundledInputs)) {
+  if (!input.includes('node_modules/')) continue;
+  let directory = path.dirname(path.resolve(input));
+  while (directory !== path.dirname(directory)) {
+    let pkg;
+    try { pkg = JSON.parse(await fs.readFile(path.join(directory, 'package.json'), 'utf8')); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    if (pkg?.name) { packages.set(`${pkg.name}@${pkg.version}`, { directory, pkg }); break; }
+    directory = path.dirname(directory);
+  }
+}
 const licenses = [];
-for (const name of ['markmap-lib', 'markmap-view', 'markmap-common', 'interactjs', 'katex', 'highlight.js']) {
-  const directory = path.resolve('node_modules', name);
-  const candidates = (await fs.readdir(directory)).filter(name => /^license/i.test(name));
-  for (const file of candidates) licenses.push(`## ${name}\n\n${await fs.readFile(path.join(directory, file), 'utf8')}`);
+for (const [name, { directory, pkg }] of [...packages].sort(([a], [b]) => a.localeCompare(b))) {
+  const candidates = (await fs.readdir(directory, { withFileTypes: true }))
+    .filter(file => file.isFile() && /^(licen[cs]e|copying|notice)/i.test(file.name));
+  const texts = await Promise.all(candidates.map(file => fs.readFile(path.join(directory, file.name), 'utf8')));
+  licenses.push(`## ${name}\n\nLicense: ${typeof pkg.license === 'string' ? pkg.license : JSON.stringify(pkg.license)}\n\n${texts.join('\n\n')}`);
 }
 await fs.writeFile(path.join(out, 'THIRD-PARTY-LICENSES.md'), licenses.join('\n\n'));
 if (production) {
