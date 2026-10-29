@@ -2,8 +2,8 @@
  * 思维导图文件导出：独立 HTML、完整 SVG 和 PNG。
  * @author liangyujia-ai
  */
-import { path } from '@typora-community-plugin/core';
-import { File, _options, bridge, reqnode } from 'typora';
+import { path, writeFileAtomic } from './platform';
+import { File, _options } from './typora';
 import type { IPureNode } from 'markmap-common';
 import type { IMarkmapJSONOptions } from 'markmap-view';
 import exportRuntime from 'markmap-export-runtime';
@@ -95,43 +95,6 @@ export async function saveExport(blob: Blob, format: ExportFormat, exportDirecto
   const basename = currentPath ? path.basename(currentPath, path.extname(currentPath)) : title;
   const filename = `${basename.replace(/[/\\?%*:|"<>\x00-\x1f]/g, '-')}.${format}`;
   const destination = path.join(directory, filename);
-  if (File.isNode) {
-    const fs = reqnode('fs');
-    await fs.promises.writeFile(destination, new Uint8Array(await blob.arrayBuffer()));
-  } else {
-    const isDirectory = await new Promise<boolean>(resolve => bridge.callHandler('path.isDirectory', directory, resolve));
-    if (!isDirectory) throw new Error(`导出目录不存在：${directory}`);
-    const base64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve((reader.result as string).split(',')[1]);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-    // 分块避免 HTML 或 PNG 超过 macOS 单条命令的参数长度；成功后再替换目标文件。
-    const temporary = `${destination}.${Date.now()}.tmp`;
-    try {
-      for (let offset = 0; offset < base64.length; offset += 48000) {
-        const chunk = base64.slice(offset, offset + 48000);
-        await runCommand(`printf '%s' '${chunk}' | base64 -D ${offset ? '>>' : '>'} ${shellQuote(temporary)}`, directory);
-      }
-      await runCommand(`mv -f ${shellQuote(temporary)} ${shellQuote(destination)}`, directory);
-    } catch (error) {
-      bridge.callHandler('library.trashItem', temporary);
-      throw error;
-    }
-  }
+  await writeFileAtomic(destination, blob);
   return destination;
-}
-
-/** 对 shell 参数逐字引用，支持目录和文件名中的空格、单引号。 */
-function shellQuote(value: string): string {
-  return `'${value.replace(/'/g, "'\\''")}'`;
-}
-
-/** 等待原生写入完成，保留系统提供的失败原因。 */
-function runCommand(args: string, cwd: string): Promise<void> {
-  return new Promise((resolve, reject) => bridge.callHandler('controller.runCommand', { args, cwd }, ([success, , error]) => {
-    if (success) resolve();
-    else reject(new Error(error || '文件写入失败'));
-  }));
 }
