@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-29",
+  "typoraVersion": "1.12.3",
+  "method": "computer-use native Quick Open and Window menu",
+  "hostBehavior": "macOS opens A.md and B.md as separate native document windows; both listed in Window menu",
+  "aMap": "A-ONLY-BODY and initial list",
+  "bMap": "B-ONLY-BODY and second document list",
+  "bListAddedAndMapUpdated": true,
+  "bListAdditionUndoneAndMapRestored": true,
+  "matchingHeadingHighlightsCurrentB": true,
+  "returnToAContainsOnlyA": true,
+  "singleButtonPerWindow": true,
+  "sameWebViewIdentitySwitch": "covered separately by actual component WKWebView review-regressions-result.json",
+  "temporaryWindowsClosed": true
+}

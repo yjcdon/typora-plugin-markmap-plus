@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-29",
+  "scope": "Actual Typora WebView: temporary CSP inserted before plugin loader; external network rejected in this page, system networking unchanged",
+  "typoraVersion": "1.12.3",
+  "policy": "default-src self file data blob typora unsafe-inline unsafe-eval; connect-src none",
+  "probeRejected": true,
+  "blockedExternalEvents": 1,
+  "localImagesDecoded": 1,
+  "localImagesTotal": 1,
+  "fontsStatus": "loaded",
+  "mapMathNodeVisible": true,
+  "computerUseExports": {
+    "html": {
+      "bytes": 1545281,
+      "sha256": "56bbb2cfd7bf4136e901dd2fc5e509af8428f4ac816d3b6cc0a84eb6413516cc"
+    },
+    "svg": {
+      "bytes": 1525722,
+      "sha256": "e10f2b215a42fc8d39c0a1b0009f3ddad19a4e798655b106edd3734dd466097a"
+    },
+    "png": {
+      "bytes": 85749,
+      "sha256": "df809153651e35fee21100316b078b46fdf64d07291c6f8dd0897e2d8447f552"
+    }
+  },
+  "originalPageRestored": true,
+  "restoredPageSha256": "b5f795479d165ae709bd23d6876a8ba2c28221024c0eef1e1ce1a82bd4657b1b"
+}

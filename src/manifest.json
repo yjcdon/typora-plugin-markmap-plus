@@ -10,11 +10,13 @@
   "settingsSchemaVersion": 1,
   "compatibility": {
     "macOS": {
-      "status": "pending",
-      "typoraVersions": []
+      "status": "verified",
+      "typoraVersions": ["1.12.3"],
+      "testedEnvironment": { "osVersion": "27.2", "architecture": "arm64" },
+      "evidence": "docs/05-验证记录.md"
     },
     "windows10": {
-      "status": "pending",
+      "status": "deferred",
       "typoraVersions": []
     }
   }
