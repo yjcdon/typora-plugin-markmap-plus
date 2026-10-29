@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-29",
+  "system": "macOS 27.2 arm64",
+  "typoraVersion": "1.12.3",
+  "pluginVersion": "2.0.0",
+  "method": "computer-use: Finder double-click followed by Typora accessibility observation and mindmap button click",
+  "finderApplicationLaunch": {
+    "processWasStopped": true,
+    "target": "/Applications/Typora.app",
+    "startedProcessId": 70815,
+    "singleMindmapButton": true,
+    "mindmapOpened": true,
+    "documentTitle": "images.md"
+  },
+  "finderFileAssociationLaunch": {
+    "processWasStopped": true,
+    "target": "docs/evidence/images.md",
+    "startedProcessId": 71016,
+    "singleMindmapButton": true,
+    "mindmapOpened": true,
+    "observedMapText": ["图片和切换验证", "第一章节", "这是第二份文档的独有正文。", "数学"],
+    "localImageNodeVisible": true,
+    "mathNodeVisible": true
+  },
+  "systemValidation": "Both launch paths opened the installed application and independent map successfully.",
+  "sameWindowFileSwitch": "Pending: menu automation did not open file tree; no passing claim recorded."
+}
