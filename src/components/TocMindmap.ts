@@ -259,7 +259,7 @@ const COMPONENT_STYLE = `
     right: 12px;
     background: var(--bg-color, #fff);
     border: var(--window-border, 1px solid #e0e0e0);
-    border-radius: 4px;                 /* 圆角 */
+    border-radius: 10px;                /* 弹出面板圆角 */
     box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* 阴影 */
     z-index: 101;                       /* z-index 层级 */
     box-sizing: border-box;
@@ -269,6 +269,7 @@ const COMPONENT_STYLE = `
   }
 
   .markmap-export-menu[hidden] { display: none; }
+  .markmap-export-menu { backdrop-filter: none; }
   .markmap-export-title { margin-bottom: 10px; font-weight: 600; }
   .markmap-export-formats { display: flex; gap: 8px; }
 
@@ -276,10 +277,11 @@ const COMPONENT_STYLE = `
     flex: 1;
     min-width: 0;
     text-align: center;
-    border: 1px solid var(--item-hover-bg-color, #d0d0d0);
+    border: 1px solid #85858a;
     border-radius: 6px;
     background: var(--bg-color, #fff);
     padding: 8px 4px;
+    min-height: 36px;
     cursor: pointer;                    /* 鼠标样式为指针 */
     font-size: 14px;                    /* 字体大小 */
     color: var(--text-color, #333);
@@ -287,6 +289,10 @@ const COMPONENT_STYLE = `
 
   .markmap-export-item:hover {
     background-color: var(--item-hover-bg-color, #e6f0fe);
+  }
+  .markmap-export-item:focus-visible {
+    outline: 2px solid var(--text-color, #333);
+    outline-offset: 2px;
   }
 
   /* 固定到右侧状态样式 */
@@ -373,7 +379,7 @@ const COMPONENT_TEMPLATE = `
       <button class="markmap-toc-btn" data-action="zoom-in" title="放大">+</button>
       <button class="markmap-toc-btn" data-action="zoom-out" title="缩小">−</button>
       <button class="markmap-toc-btn" data-action="fit" title="适应视图">⌖</button>
-      <button class="markmap-toc-btn" data-action="export" title="导出">↓</button>
+      <button class="markmap-toc-btn" data-action="export" title="导出" aria-label="导出" aria-haspopup="dialog" aria-controls="markmap-export-panel" aria-expanded="false">↓</button>
       <button class="markmap-toc-btn" data-action="settings" title="导图设置" aria-label="导图设置">⚙</button>
       <button class="markmap-toc-btn" data-action="close" title="关闭">×</button>
     </div>
@@ -381,7 +387,7 @@ const COMPONENT_TEMPLATE = `
   <div class="markmap-toc-content">
     <svg class="markmap-svg"></svg>
   </div>
-  <div class="markmap-export-menu" role="dialog" aria-label="导出" hidden>
+  <div class="markmap-export-menu" id="markmap-export-panel" role="dialog" aria-label="导出" hidden>
     <div class="markmap-export-title">导出</div>
     <div class="markmap-export-formats">
       <button class="markmap-export-item" data-action="export-html">HTML</button>
@@ -894,20 +900,33 @@ export class TocMindmapComponent {
     // 弹窗外点击继续执行原操作；Escape 关闭后回到导出按钮。
     const dismissOutside = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (!menu.hidden && !menu.contains(target) && !trigger.contains(target)) menu.hidden = true;
+      if (!menu.hidden && !menu.contains(target) && !trigger.contains(target)) this._setExportMenuVisible(false);
     };
     const dismissWithEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !menu.hidden) {
         event.preventDefault();
-        menu.hidden = true;
+        this._setExportMenuVisible(false);
         trigger.focus();
+      } else if (!menu.hidden && menu.contains(event.target as Node) && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+        const buttons = Array.from(menu.querySelectorAll<HTMLButtonElement>('button'));
+        const current = buttons.indexOf(document.activeElement as HTMLButtonElement);
+        const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1
+          : (current + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+        event.preventDefault();
+        buttons[next].focus();
       }
     };
     document.addEventListener('pointerdown', dismissOutside, true);
     document.addEventListener('keydown', dismissWithEscape);
+    const dismissOnFocusOut = (event: FocusEvent) => {
+      const next = event.relatedTarget as Node | null;
+      if (next && !menu.contains(next) && !trigger.contains(next)) this._setExportMenuVisible(false);
+    };
+    menu.addEventListener('focusout', dismissOnFocusOut);
     this._eventCleanupFunctions.push(() => {
       document.removeEventListener('pointerdown', dismissOutside, true);
       document.removeEventListener('keydown', dismissWithEscape);
+      menu.removeEventListener('focusout', dismissOnFocusOut);
     });
   }
 
@@ -977,7 +996,7 @@ export class TocMindmapComponent {
           case 'zoom-out': this._zoomOut(); break;            // 缩小思维导图
           case 'fit': await this._fitToView(e as MouseEvent); break; // 适应视图大小
           case 'settings': this.onOpenSettings?.(); break;
-          case 'export': this._setExportMenuVisible(true); break;
+          case 'export': this._setExportMenuVisible((this.state.element!.querySelector('.markmap-export-menu') as HTMLElement).hidden); break;
           case 'export-html': await this._exportMarkmap('html'); break;
           case 'export-svg': await this._exportMarkmap('svg'); break;
           case 'export-png': await this._exportMarkmap('png'); break;
@@ -1492,6 +1511,7 @@ export class TocMindmapComponent {
   private _setExportMenuVisible(visible: boolean) {
     const menu = this.state.element!.querySelector('.markmap-export-menu') as HTMLElement;
     menu.hidden = !visible;
+    this.state.element!.querySelector('[data-action="export"]')!.setAttribute('aria-expanded', String(visible));
     if (visible) (menu.querySelector('button') as HTMLButtonElement).focus();
   }
 
