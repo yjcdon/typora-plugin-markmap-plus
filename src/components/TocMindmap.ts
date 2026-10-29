@@ -805,8 +805,8 @@ export class TocMindmapComponent {
    * 更新 InteractJS 拖动设置
    *
    * 根据工具栏位置动态调整拖动功能：
-   * - 侧边栏模式：禁用标题栏拖动
-   * - 顶部模式：启用标题栏拖动
+   * - 固定窗口或侧边工具栏：保持锚定位置
+   * - 顶部工具栏浮窗：允许拖动
    */
   private _updateInteractSettings() {
     // 如果组件元素不存在，则直接返回
@@ -817,8 +817,8 @@ export class TocMindmapComponent {
     // 获取标题栏元素
     const header = this.state.element.querySelector('.markmap-toc-header') as HTMLElement;
 
-    // 侧边栏模式下禁用拖动
-    if (this.options.toolbarPosition === 'side') {
+    // 设置刷新后仍保持固定窗口的锚定状态。
+    if (this.options.toolbarPosition === 'side' || this.state.isPinLeft || this.state.isPinRight) {
       interactInstance.draggable(false);
       if (header) header.style.cursor = 'default';
       return;
@@ -1751,6 +1751,9 @@ export class TocMindmapComponent {
         height: `${modalHeight}px`,
         transform: 'none'
       });
+      // 固定位置已写入 left/top，旧浮窗位移也随之归零。
+      this.state.element.removeAttribute('data-x');
+      this.state.element.removeAttribute('data-y');
 
       // 验证实际位置
       const actualRect = this.state.element.getBoundingClientRect();
@@ -1781,6 +1784,7 @@ export class TocMindmapComponent {
             }
           }
         });
+      this._updateInteractSettings();
     } else {
       // 更新按钮状态
       if (btn) {
@@ -2034,16 +2038,10 @@ export class TocMindmapComponent {
   /**
    * 初始化实时更新功能
    *
-   * 只订阅正文结构与文字变化，防抖后读取最新文档。
+   * 订阅正文变化；编辑刷新由设置控制，切换文档始终同步。
    */
   private _initRealTimeUpdate() {
-    // 如果未启用实时更新功能，则记录日志并返回
-    if (!this.options.enableRealTimeUpdate) {
-      logger('实时更新功能已禁用');
-      return;
-    }
-
-    logger('开始初始化实时更新功能');
+    logger('开始监听当前文档变化');
     this._initMutationObserver();
   }
 
@@ -2068,7 +2066,10 @@ export class TocMindmapComponent {
 
     logger('开始初始化 MutationObserver');
     // 创建 MutationObserver 实例
-    this.state.contentObserver = new MutationObserver(() => this.debouncedUpdate());
+    this.state.contentObserver = new MutationObserver(() => {
+      const documentChanged = this.editorAdapter.getDocumentId?.() !== this.documentId;
+      if (this.options.enableRealTimeUpdate || documentChanged) this.debouncedUpdate();
+    });
 
     // 配置观察器：只监听必要的变化类型
     this.state.contentObserver.observe(writeElement, {

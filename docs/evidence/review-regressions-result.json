@@ -1,0 +1,126 @@
+{
+  "status": "passed",
+  "engine": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko)",
+  "scope": "Actual WKWebView, current TocMindmap/Markmap/interact; synthetic editor adapter; export functions stubbed because this checks interaction and document lifecycle",
+  "checks": [
+    {
+      "name": "realtime off same-document edit skips update",
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "same-document map retained",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "document identity followed",
+      "actual": "B",
+      "expected": "B"
+    },
+    {
+      "name": "document switch replaces map",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "new content rendered",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "document switch stable without repeated update",
+      "actual": 2,
+      "expected": 2
+    },
+    {
+      "name": "initial actual drag listener offset",
+      "actual": "70",
+      "expected": "70"
+    },
+    {
+      "name": "left pin clears data offsets",
+      "actual": [
+        null,
+        null
+      ],
+      "expected": [
+        null,
+        null
+      ]
+    },
+    {
+      "name": "left pin disables drag",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "left settings preserve disabled drag",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "left unpin enables drag",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "left first drag starts fresh",
+      "actual": [
+        "5",
+        "6"
+      ],
+      "expected": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "name": "right pin clears data offsets",
+      "actual": [
+        null,
+        null
+      ],
+      "expected": [
+        null,
+        null
+      ]
+    },
+    {
+      "name": "right pin disables drag",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "right settings preserve disabled drag",
+      "actual": false,
+      "expected": false
+    },
+    {
+      "name": "right unpin enables drag",
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "right first drag starts fresh",
+      "actual": [
+        "5",
+        "6"
+      ],
+      "expected": [
+        "5",
+        "6"
+      ]
+    },
+    {
+      "name": "destroy removes component",
+      "actual": true,
+      "expected": true
+    }
+  ],
+  "failures": [],
+  "renderUpdateCalls": 4,
+  "recordedAt": "2026-10-29T22:30:18.737608+08:00",
+  "sourceSha256": "1e9c74ff75b5c191b0a019c52e8e9837dc4eafc9906d0d6ed0dd4276f27b84a6",
+  "validationMethod": "Bundled current source with esbuild and executed in a visible native WKWebView. Document edits use actual MutationObserver; settings use updateOptions; drag events use actual registered interact.fire listeners. No hardware pointer gesture is asserted."
+}

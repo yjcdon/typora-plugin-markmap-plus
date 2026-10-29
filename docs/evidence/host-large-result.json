@@ -1,0 +1,1359 @@
+{
+  "status": "sampling-complete",
+  "timezone": "Asia/Shanghai",
+  "samplingIntervalSeconds": 5,
+  "plannedDurationSeconds": 60,
+  "command": [
+    "ps",
+    "-p",
+    "75445,75448,75451,75452,75453,76554",
+    "-o",
+    "pid=,ppid=,%cpu=,rss=,etime=,lstart=,comm="
+  ],
+  "hostPlatform": "macOS-27.2-arm64-arm-64bit",
+  "selectedPids": [
+    75445,
+    75448,
+    75451,
+    75452,
+    75453,
+    76554
+  ],
+  "fixture": {
+    "characters": 54569,
+    "bytes": 100583,
+    "headings": 1001,
+    "sections": 1000,
+    "generation": "H1 root; 1000 H2 sections each with paragraph, list item and nested list item",
+    "sha256": "1f0baf4e5f098233e93fe6e3a25470edfd3b5c971b67c6d5595aaa6089da3678"
+  },
+  "attribution": {
+    "host": "PID 75445 executable confirms Typora; host measurements include all open windows.",
+    "largeDocumentCandidate": "PID 76554 WebContent started at 22:23:31, later than the two existing WebContent processes. Selected as the new document candidate based on launch timing and parent-agent report that large.md was just opened. Window-to-PID attachment is not independently proven.",
+    "backgroundControls": "PIDs 75451/75452 were already running since 22:22:08/09 and are recorded separately as controls, not merged with the large-document candidate.",
+    "sharedCandidates": "GPU 75448 and Networking 75453 started with Typora and may serve several windows.",
+    "excluded": "Networking PID 3639 predates the current Typora launch by over one day."
+  },
+  "units": {
+    "cpuPercent": "macOS ps %cpu; percentage of one CPU, scheduler-averaged rather than exact five-second interval utilization.",
+    "rssKiB": "macOS ps resident set size in KiB; includes mapped/shared pages; not JS heap.",
+    "rssMiB": "rssKiB / 1024.",
+    "sampleElapsedSeconds": "monotonic seconds since sampler start"
+  },
+  "activity": {
+    "source": "Parent computer-use report",
+    "endUTC": "2026-10-29T14:26:06.063Z",
+    "toggleCount": 11,
+    "description": "First expansion followed by five collapse/expand cycles; final state expanded. Parent leaves the large window idle throughout the follow-up sampling.",
+    "firstObservedExpansionMilliseconds": 9982,
+    "subsequentObservedExpansionMillisecondsRange": [
+      5288,
+      6324
+    ],
+    "timingMeaning": "Includes computer-use and accessibility-tree traversal overhead; not pure render latency."
+  },
+  "limitations": [
+    "Finite 60-second sampling complements resource lifecycle checks; it is not proof of leak-free operation.",
+    "macOS XPC processes report PPID 1. Large-document association is a launch-timing candidate, not a verified parent-child or window-to-PID mapping.",
+    "Background WebContent processes are shown separately; process memory is never summed as exclusive large-document memory.",
+    "Host/GPU/Networking may include all open windows; ps CPU is averaged and is not isolated plugin cost.",
+    "RSS fluctuates with GC, mapped pages and OS residency.",
+    "Computer-use accessibility/screenshot collection runs during the actions and may contribute to host/WebKit CPU and memory. This sampler cannot separate that overhead from plugin rendering."
+  ],
+  "samples": [
+    {
+      "index": 0,
+      "timestamp": "2026-10-29T22:24:48.604+08:00",
+      "sampleElapsedSeconds": 0.01,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.0,
+          "rssKiB": 110592,
+          "rssMiB": 108.0,
+          "processElapsed": "02:41",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 18480,
+          "rssMiB": 18.047,
+          "processElapsed": "02:40",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 33520,
+          "rssMiB": 32.734,
+          "processElapsed": "02:40",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.1,
+          "rssKiB": 38224,
+          "rssMiB": 37.328,
+          "processElapsed": "02:39",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 5808,
+          "rssMiB": 5.672,
+          "processElapsed": "02:39",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 150912,
+          "rssMiB": 147.375,
+          "processElapsed": "01:17",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 1,
+      "timestamp": "2026-10-29T22:24:53.608+08:00",
+      "sampleElapsedSeconds": 5.014,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.0,
+          "rssKiB": 107408,
+          "rssMiB": 104.891,
+          "processElapsed": "02:46",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 27984,
+          "rssMiB": 27.328,
+          "processElapsed": "02:45",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 33152,
+          "rssMiB": 32.375,
+          "processElapsed": "02:45",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 36800,
+          "rssMiB": 35.938,
+          "processElapsed": "02:44",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 5808,
+          "rssMiB": 5.672,
+          "processElapsed": "02:44",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 1.0,
+          "rssKiB": 87856,
+          "rssMiB": 85.797,
+          "processElapsed": "01:22",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 2,
+      "timestamp": "2026-10-29T22:24:58.606+08:00",
+      "sampleElapsedSeconds": 10.021,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.3,
+          "rssKiB": 107504,
+          "rssMiB": 104.984,
+          "processElapsed": "02:51",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 26320,
+          "rssMiB": 25.703,
+          "processElapsed": "02:50",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 35072,
+          "rssMiB": 34.25,
+          "processElapsed": "02:50",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 36864,
+          "rssMiB": 36.0,
+          "processElapsed": "02:49",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 5808,
+          "rssMiB": 5.672,
+          "processElapsed": "02:49",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 87936,
+          "rssMiB": 85.875,
+          "processElapsed": "01:27",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 3,
+      "timestamp": "2026-10-29T22:25:03.605+08:00",
+      "sampleElapsedSeconds": 15.012,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.0,
+          "rssKiB": 117968,
+          "rssMiB": 115.203,
+          "processElapsed": "02:56",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 23504,
+          "rssMiB": 22.953,
+          "processElapsed": "02:55",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 3.8,
+          "rssKiB": 56736,
+          "rssMiB": 55.406,
+          "processElapsed": "02:55",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 36720,
+          "rssMiB": 35.859,
+          "processElapsed": "02:54",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 5808,
+          "rssMiB": 5.672,
+          "processElapsed": "02:54",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 80720,
+          "rssMiB": 78.828,
+          "processElapsed": "01:32",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 4,
+      "timestamp": "2026-10-29T22:25:08.607+08:00",
+      "sampleElapsedSeconds": 20.086,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 7.1,
+          "rssKiB": 115840,
+          "rssMiB": 113.125,
+          "processElapsed": "03:01",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 11.3,
+          "rssKiB": 26224,
+          "rssMiB": 25.609,
+          "processElapsed": "03:00",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.2,
+          "rssKiB": 37232,
+          "rssMiB": 36.359,
+          "processElapsed": "03:00",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.1,
+          "rssKiB": 35584,
+          "rssMiB": 34.75,
+          "processElapsed": "02:59",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2464,
+          "rssMiB": 2.406,
+          "processElapsed": "02:59",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 89.6,
+          "rssKiB": 181216,
+          "rssMiB": 176.969,
+          "processElapsed": "01:37",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 5,
+      "timestamp": "2026-10-29T22:25:13.612+08:00",
+      "sampleElapsedSeconds": 25.199,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 1.5,
+          "rssKiB": 112480,
+          "rssMiB": 109.844,
+          "processElapsed": "03:06",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.9,
+          "rssKiB": 24944,
+          "rssMiB": 24.359,
+          "processElapsed": "03:05",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 36688,
+          "rssMiB": 35.828,
+          "processElapsed": "03:05",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 35152,
+          "rssMiB": 34.328,
+          "processElapsed": "03:04",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2192,
+          "rssMiB": 2.141,
+          "processElapsed": "03:04",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 99.5,
+          "rssKiB": 580336,
+          "rssMiB": 566.734,
+          "processElapsed": "01:42",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 6,
+      "timestamp": "2026-10-29T22:25:18.611+08:00",
+      "sampleElapsedSeconds": 30.372,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 1.2,
+          "rssKiB": 106672,
+          "rssMiB": 104.172,
+          "processElapsed": "03:11",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 30384,
+          "rssMiB": 29.672,
+          "processElapsed": "03:10",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.2,
+          "rssKiB": 94224,
+          "rssMiB": 92.016,
+          "processElapsed": "03:10",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 35328,
+          "rssMiB": 34.5,
+          "processElapsed": "03:09",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 4096,
+          "rssMiB": 4.0,
+          "processElapsed": "03:09",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 41.6,
+          "rssKiB": 592272,
+          "rssMiB": 578.391,
+          "processElapsed": "01:47",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 7,
+      "timestamp": "2026-10-29T22:25:23.607+08:00",
+      "sampleElapsedSeconds": 35.027,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 2.5,
+          "rssKiB": 106864,
+          "rssMiB": 104.359,
+          "processElapsed": "03:16",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 30688,
+          "rssMiB": 29.969,
+          "processElapsed": "03:15",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.1,
+          "rssKiB": 90304,
+          "rssMiB": 88.188,
+          "processElapsed": "03:15",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.1,
+          "rssKiB": 35008,
+          "rssMiB": 34.188,
+          "processElapsed": "03:14",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 3168,
+          "rssMiB": 3.094,
+          "processElapsed": "03:14",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 21.4,
+          "rssKiB": 601952,
+          "rssMiB": 587.844,
+          "processElapsed": "01:52",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 8,
+      "timestamp": "2026-10-29T22:25:28.607+08:00",
+      "sampleElapsedSeconds": 40.029,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.7,
+          "rssKiB": 107568,
+          "rssMiB": 105.047,
+          "processElapsed": "03:21",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 52.8,
+          "rssKiB": 59168,
+          "rssMiB": 57.781,
+          "processElapsed": "03:20",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 90096,
+          "rssMiB": 87.984,
+          "processElapsed": "03:20",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 35008,
+          "rssMiB": 34.188,
+          "processElapsed": "03:19",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2576,
+          "rssMiB": 2.516,
+          "processElapsed": "03:19",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 105.2,
+          "rssKiB": 774832,
+          "rssMiB": 756.672,
+          "processElapsed": "01:57",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 9,
+      "timestamp": "2026-10-29T22:25:33.609+08:00",
+      "sampleElapsedSeconds": 45.017,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 1.1,
+          "rssKiB": 107952,
+          "rssMiB": 105.422,
+          "processElapsed": "03:26",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 32464,
+          "rssMiB": 31.703,
+          "processElapsed": "03:25",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.1,
+          "rssKiB": 89952,
+          "rssMiB": 87.844,
+          "processElapsed": "03:25",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.1,
+          "rssKiB": 35232,
+          "rssMiB": 34.406,
+          "processElapsed": "03:24",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2512,
+          "rssMiB": 2.453,
+          "processElapsed": "03:24",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 72.2,
+          "rssKiB": 757248,
+          "rssMiB": 739.5,
+          "processElapsed": "02:02",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 10,
+      "timestamp": "2026-10-29T22:25:38.606+08:00",
+      "sampleElapsedSeconds": 50.042,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.1,
+          "rssKiB": 102864,
+          "rssMiB": 100.453,
+          "processElapsed": "03:31",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 16.6,
+          "rssKiB": 58720,
+          "rssMiB": 57.344,
+          "processElapsed": "03:30",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 89824,
+          "rssMiB": 87.719,
+          "processElapsed": "03:30",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.0,
+          "rssKiB": 35184,
+          "rssMiB": 34.359,
+          "processElapsed": "03:29",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2512,
+          "rssMiB": 2.453,
+          "processElapsed": "03:29",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 93.1,
+          "rssKiB": 698640,
+          "rssMiB": 682.266,
+          "processElapsed": "02:07",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 11,
+      "timestamp": "2026-10-29T22:25:43.609+08:00",
+      "sampleElapsedSeconds": 55.028,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 3.8,
+          "rssKiB": 101184,
+          "rssMiB": 98.812,
+          "processElapsed": "03:36",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 31840,
+          "rssMiB": 31.094,
+          "processElapsed": "03:35",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.1,
+          "rssKiB": 90064,
+          "rssMiB": 87.953,
+          "processElapsed": "03:35",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.1,
+          "rssKiB": 35376,
+          "rssMiB": 34.547,
+          "processElapsed": "03:34",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2512,
+          "rssMiB": 2.453,
+          "processElapsed": "03:34",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 81.2,
+          "rssKiB": 693072,
+          "rssMiB": 676.828,
+          "processElapsed": "02:12",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    },
+    {
+      "index": 12,
+      "timestamp": "2026-10-29T22:25:48.609+08:00",
+      "sampleElapsedSeconds": 60.018,
+      "processes": [
+        {
+          "pid": 75445,
+          "ppid": 1,
+          "role": "Typora host shared by all windows",
+          "cpuPercent": 0.5,
+          "rssKiB": 101120,
+          "rssMiB": 98.75,
+          "processElapsed": "03:41",
+          "processStartLocal": "Thu Oct 29 22:22:07 2026",
+          "executable": "/Applications/Typora.app/Contents/MacOS/Typora"
+        },
+        {
+          "pid": 75448,
+          "ppid": 1,
+          "role": "WebKit GPU shared candidate",
+          "cpuPercent": 4.1,
+          "rssKiB": 59680,
+          "rssMiB": 58.281,
+          "processElapsed": "03:40",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.GPU.xpc/Contents/MacOS/com.apple.WebKit.GPU"
+        },
+        {
+          "pid": 75451,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control A",
+          "cpuPercent": 0.0,
+          "rssKiB": 34288,
+          "rssMiB": 33.484,
+          "processElapsed": "03:40",
+          "processStartLocal": "Thu Oct 29 22:22:08 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75452,
+          "ppid": 1,
+          "role": "Earlier small-document WebContent control B",
+          "cpuPercent": 0.2,
+          "rssKiB": 108336,
+          "rssMiB": 105.797,
+          "processElapsed": "03:39",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        },
+        {
+          "pid": 75453,
+          "ppid": 1,
+          "role": "WebKit Networking shared candidate",
+          "cpuPercent": 0.0,
+          "rssKiB": 2512,
+          "rssMiB": 2.453,
+          "processElapsed": "03:39",
+          "processStartLocal": "Thu Oct 29 22:22:09 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.Networking.xpc/Contents/MacOS/com.apple.WebKit.Networking"
+        },
+        {
+          "pid": 76554,
+          "ppid": 1,
+          "role": "New large-document WebContent candidate",
+          "cpuPercent": 49.3,
+          "rssKiB": 913472,
+          "rssMiB": 892.062,
+          "processElapsed": "02:17",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      ],
+      "missingPids": []
+    }
+  ],
+  "actualElapsedSeconds": 60.018,
+  "summary": [
+    {
+      "pid": 75445,
+      "role": "Typora host shared by all windows",
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 7.1,
+      "rssMiBFirst": 108.0,
+      "rssMiBLast": 98.75,
+      "rssMiBMin": 98.75,
+      "rssMiBMax": 115.203,
+      "rssMiBFirstToLastDelta": -9.25,
+      "processIdentityStable": true
+    },
+    {
+      "pid": 75448,
+      "role": "WebKit GPU shared candidate",
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 52.8,
+      "rssMiBFirst": 18.047,
+      "rssMiBLast": 58.281,
+      "rssMiBMin": 18.047,
+      "rssMiBMax": 58.281,
+      "rssMiBFirstToLastDelta": 40.234,
+      "processIdentityStable": true
+    },
+    {
+      "pid": 75451,
+      "role": "Earlier small-document WebContent control A",
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 3.8,
+      "rssMiBFirst": 32.734,
+      "rssMiBLast": 33.484,
+      "rssMiBMin": 32.375,
+      "rssMiBMax": 92.016,
+      "rssMiBFirstToLastDelta": 0.75,
+      "processIdentityStable": true
+    },
+    {
+      "pid": 75452,
+      "role": "Earlier small-document WebContent control B",
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 0.2,
+      "rssMiBFirst": 37.328,
+      "rssMiBLast": 105.797,
+      "rssMiBMin": 34.188,
+      "rssMiBMax": 105.797,
+      "rssMiBFirstToLastDelta": 68.469,
+      "processIdentityStable": true
+    },
+    {
+      "pid": 75453,
+      "role": "WebKit Networking shared candidate",
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 0.0,
+      "rssMiBFirst": 5.672,
+      "rssMiBLast": 2.453,
+      "rssMiBMin": 2.141,
+      "rssMiBMax": 5.672,
+      "rssMiBFirstToLastDelta": -3.219,
+      "processIdentityStable": true
+    },
+    {
+      "pid": 76554,
+      "role": "New large-document WebContent candidate",
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 105.2,
+      "rssMiBFirst": 147.375,
+      "rssMiBLast": 892.062,
+      "rssMiBMin": 78.828,
+      "rssMiBMax": 892.062,
+      "rssMiBFirstToLastDelta": 744.687,
+      "processIdentityStable": true
+    }
+  ],
+  "observations": [
+    "The 60-second window ended while the parent operation sequence was still being reported; idle recovery is not established by these samples.",
+    "New WebContent candidate PID 76554 reached 105.2% ps CPU and 892.062 MiB RSS. The final sample remained at 49.3% CPU and 892.062 MiB RSS.",
+    "Two older WebContent controls and shared GPU/network candidates remain separate; no aggregate is attributed solely to the large document.",
+    "This run demonstrates substantial host-side load for the exercised large-document workflow. Follow-up idle observation and action timing are needed to distinguish active workload from retained resources.",
+    "Idle follow-up is recorded separately with the same PID; the expanded mind map remains allocated, so idle RSS is not equivalent to a closed-map baseline."
+  ],
+  "idleFollowUp": {
+    "status": "sampling-complete",
+    "intervalSeconds": 5,
+    "plannedDurationSeconds": 60,
+    "pid": 76554,
+    "role": "Same large-document WebContent candidate as active sampling",
+    "activity": "Large document stays expanded; parent reports no further manipulation during this segment.",
+    "samples": [
+      {
+        "index": 0,
+        "timestamp": "2026-10-29T22:27:02.230+08:00",
+        "sampleElapsedSeconds": 0.011,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.1,
+          "rssKiB": 272960,
+          "rssMiB": 266.562,
+          "processElapsed": "03:31",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 1,
+        "timestamp": "2026-10-29T22:27:07.230+08:00",
+        "sampleElapsedSeconds": 5.038,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.2,
+          "rssKiB": 272928,
+          "rssMiB": 266.531,
+          "processElapsed": "03:36",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 2,
+        "timestamp": "2026-10-29T22:27:12.235+08:00",
+        "sampleElapsedSeconds": 10.02,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 272624,
+          "rssMiB": 266.234,
+          "processElapsed": "03:41",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 3,
+        "timestamp": "2026-10-29T22:27:17.235+08:00",
+        "sampleElapsedSeconds": 15.021,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 272576,
+          "rssMiB": 266.188,
+          "processElapsed": "03:46",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 4,
+        "timestamp": "2026-10-29T22:27:22.232+08:00",
+        "sampleElapsedSeconds": 20.013,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 272288,
+          "rssMiB": 265.906,
+          "processElapsed": "03:51",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 5,
+        "timestamp": "2026-10-29T22:27:27.254+08:00",
+        "sampleElapsedSeconds": 25.261,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 263360,
+          "rssMiB": 257.188,
+          "processElapsed": "03:56",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 6,
+        "timestamp": "2026-10-29T22:27:32.231+08:00",
+        "sampleElapsedSeconds": 30.012,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 222784,
+          "rssMiB": 217.562,
+          "processElapsed": "04:01",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 7,
+        "timestamp": "2026-10-29T22:27:37.235+08:00",
+        "sampleElapsedSeconds": 35.023,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 112768,
+          "rssMiB": 110.125,
+          "processElapsed": "04:06",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 8,
+        "timestamp": "2026-10-29T22:27:42.234+08:00",
+        "sampleElapsedSeconds": 40.064,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 32304,
+          "rssMiB": 31.547,
+          "processElapsed": "04:11",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 9,
+        "timestamp": "2026-10-29T22:27:47.233+08:00",
+        "sampleElapsedSeconds": 45.015,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 32256,
+          "rssMiB": 31.5,
+          "processElapsed": "04:16",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 10,
+        "timestamp": "2026-10-29T22:27:52.234+08:00",
+        "sampleElapsedSeconds": 50.015,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 32416,
+          "rssMiB": 31.656,
+          "processElapsed": "04:21",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 11,
+        "timestamp": "2026-10-29T22:27:57.231+08:00",
+        "sampleElapsedSeconds": 55.015,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.0,
+          "rssKiB": 32272,
+          "rssMiB": 31.516,
+          "processElapsed": "04:26",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      },
+      {
+        "index": 12,
+        "timestamp": "2026-10-29T22:28:02.234+08:00",
+        "sampleElapsedSeconds": 60.068,
+        "process": {
+          "pid": 76554,
+          "ppid": 1,
+          "cpuPercent": 0.1,
+          "rssKiB": 32432,
+          "rssMiB": 31.672,
+          "processElapsed": "04:31",
+          "processStartLocal": "Thu Oct 29 22:23:31 2026",
+          "executable": "/System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent"
+        }
+      }
+    ],
+    "command": [
+      "ps",
+      "-p",
+      "76554",
+      "-o",
+      "pid=,ppid=,%cpu=,rss=,etime=,lstart=,comm="
+    ],
+    "actualElapsedSeconds": 60.068,
+    "summary": {
+      "observedSamples": 13,
+      "cpuPercentMin": 0.0,
+      "cpuPercentMax": 0.2,
+      "rssMiBFirst": 266.562,
+      "rssMiBLast": 31.672,
+      "rssMiBMin": 31.5,
+      "rssMiBMax": 266.562,
+      "rssMiBFirstToLastDelta": -234.89,
+      "matchesOriginalProcessIdentity": true
+    },
+    "interpretation": "Same PID and process start identity stayed present. Across 13 idle samples CPU was 0–0.2%; RSS fell from 266.562 to 31.672 MiB, after the active-period observed maximum of 892.062 MiB. This interval demonstrates resource release after this workload; finite ps samples do not establish leak absence. RSS may also change with OS memory reclamation; PID-to-window attribution remains temporal."
+  },
+  "computerUse": {
+    "toggleActions": 11,
+    "completedCyclesAfterFirstOpen": 5,
+    "observationWindowUTC": [
+      "14:25:17.936",
+      "14:26:06.063"
+    ],
+    "uniqueButtonEachSnapshot": true,
+    "firstObservationLatencyMs": 9982,
+    "laterOpenObservationLatencyMs": [
+      6205,
+      6324,
+      5922,
+      5215,
+      5288
+    ],
+    "latencyMeaning": "Includes CUA action and accessibility traversal; not isolated map rendering time",
+    "temporaryWindowClosed": true
+  }
+}
