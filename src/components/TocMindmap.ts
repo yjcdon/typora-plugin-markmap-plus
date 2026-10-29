@@ -262,21 +262,24 @@ const COMPONENT_STYLE = `
     border-radius: 4px;                 /* 圆角 */
     box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* 阴影 */
     z-index: 101;                       /* z-index 层级 */
-    padding: 4px 0;                     /* 垂直内边距 4px */
+    box-sizing: border-box;
+    padding: 12px;
     width: 250px;
     max-width: calc(100% - 24px);
   }
 
   .markmap-export-menu[hidden] { display: none; }
-  .markmap-export-title { padding: 8px 16px; font-weight: bold; }
+  .markmap-export-title { margin-bottom: 10px; font-weight: 600; }
+  .markmap-export-formats { display: flex; gap: 8px; }
 
   .markmap-export-item {
-    display: block;
-    width: 100%;
-    text-align: left;
-    border: none;
-    background: transparent;
-    padding: 8px 16px;                  /* 内边距 */
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    border: 1px solid var(--item-hover-bg-color, #d0d0d0);
+    border-radius: 6px;
+    background: var(--bg-color, #fff);
+    padding: 8px 4px;
     cursor: pointer;                    /* 鼠标样式为指针 */
     font-size: 14px;                    /* 字体大小 */
     color: var(--text-color, #333);
@@ -378,12 +381,13 @@ const COMPONENT_TEMPLATE = `
   <div class="markmap-toc-content">
     <svg class="markmap-svg"></svg>
   </div>
-  <div class="markmap-export-menu" role="dialog" aria-label="导出思维导图" hidden>
-    <div class="markmap-export-title">导出思维导图</div>
-    <button class="markmap-export-item" data-action="export-html">HTML · 可交互，支持黑白切换</button>
-    <button class="markmap-export-item" data-action="export-svg">SVG · 矢量图片</button>
-    <button class="markmap-export-item" data-action="export-png">PNG · 普通图片</button>
-    <button class="markmap-export-item" data-action="export-cancel">取消</button>
+  <div class="markmap-export-menu" role="dialog" aria-label="导出" hidden>
+    <div class="markmap-export-title">导出</div>
+    <div class="markmap-export-formats">
+      <button class="markmap-export-item" data-action="export-html">HTML</button>
+      <button class="markmap-export-item" data-action="export-svg">SVG</button>
+      <button class="markmap-export-item" data-action="export-png">PNG</button>
+    </div>
   </div>
 `;
 
@@ -885,6 +889,26 @@ export class TocMindmapComponent {
     // 保存清理函数，用于后续移除监听器
     const element = this.state.element;
     this._eventCleanupFunctions.push(() => element.removeEventListener('click', boundHandler));
+    const menu = element.querySelector('.markmap-export-menu') as HTMLElement;
+    const trigger = element.querySelector('[data-action="export"]') as HTMLButtonElement;
+    // 弹窗外点击继续执行原操作；Escape 关闭后回到导出按钮。
+    const dismissOutside = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!menu.hidden && !menu.contains(target) && !trigger.contains(target)) menu.hidden = true;
+    };
+    const dismissWithEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !menu.hidden) {
+        event.preventDefault();
+        menu.hidden = true;
+        trigger.focus();
+      }
+    };
+    document.addEventListener('pointerdown', dismissOutside, true);
+    document.addEventListener('keydown', dismissWithEscape);
+    this._eventCleanupFunctions.push(() => {
+      document.removeEventListener('pointerdown', dismissOutside, true);
+      document.removeEventListener('keydown', dismissWithEscape);
+    });
   }
 
   /**
@@ -954,7 +978,6 @@ export class TocMindmapComponent {
           case 'fit': await this._fitToView(e as MouseEvent); break; // 适应视图大小
           case 'settings': this.onOpenSettings?.(); break;
           case 'export': this._setExportMenuVisible(true); break;
-          case 'export-cancel': this._setExportMenuVisible(false); break;
           case 'export-html': await this._exportMarkmap('html'); break;
           case 'export-svg': await this._exportMarkmap('svg'); break;
           case 'export-png': await this._exportMarkmap('png'); break;
