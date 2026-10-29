@@ -76,6 +76,34 @@ export function getSettingsPath(): string {
   return path.join(_options.userDataPath, 'markmap-plus', 'data', 'settings.json');
 }
 
+/** 将文档中的本地图片内嵌到导出文件，避免 SVG 图片解码时丢失外部文件资源。 */
+export async function readLocalImageDataUrl(source: string): Promise<string> {
+  let filename = source;
+  if (/^file:/i.test(source)) {
+    if (File.isNode) {
+      filename = reqnode('url').fileURLToPath(source);
+    } else {
+      const url = new URL(source);
+      if (url.hostname && url.hostname !== 'localhost') throw new Error(`图片需要本地文件地址：${source}`);
+      filename = decodeURIComponent(url.pathname);
+    }
+  }
+  validatePath(filename);
+  const mimeTypes: Record<string, string> = {
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
+    '.webp': 'image/webp', '.svg': 'image/svg+xml', '.avif': 'image/avif', '.bmp': 'image/bmp',
+  };
+  const mime = mimeTypes[path.extname(filename).toLowerCase()] || 'application/octet-stream';
+  let base64: string;
+  if (File.isNode) {
+    const fs: typeof import('fs') = reqnode('fs');
+    base64 = (await fs.promises.readFile(filename)).toString('base64');
+  } else {
+    base64 = (await runCommand(`/usr/bin/base64 -i ${shellQuote(filename)}`, path.dirname(filename))).replace(/\s/g, '');
+  }
+  return `data:${mime};base64,${base64}`;
+}
+
 /** 缺失设置代表首次使用，读取或权限错误保留原始失败原因。 */
 export async function readSettings(): Promise<string | null> {
   const filename = getSettingsPath();

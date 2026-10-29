@@ -1,0 +1,1 @@
+{"failures":[],"metrics":[{"sections":100,"characters":9187,"nodes":401,"mapped":401,"initialMs":89,"updateMs":143},{"sections":500,"characters":47587,"nodes":2001,"mapped":2001,"initialMs":265,"updateMs":314},{"sections":1000,"characters":95587,"nodes":4001,"mapped":4001,"initialMs":556,"updateMs":577}],"remaining":0}

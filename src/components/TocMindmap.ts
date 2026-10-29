@@ -25,10 +25,12 @@ import { zoomIdentity, zoomTransform } from 'd3-zoom';
 // 导入 d3-selection 库的选择器函数，用于操作 DOM 元素
 import { select } from 'd3-selection';
 // 导入项目内部的工具函数，包括日志记录和防抖函数
-import { logger, debounce } from '../utils';
+import { logger, debounce, isMacOS } from '../utils';
 // 导入 interactjs 库，用于实现拖拽和调整大小功能
 import interact from 'interactjs';
-import { createInteractiveHtml, createPng, saveExport, type ExportFormat } from '../export';
+import exportStyle from 'markmap-export-style';
+import { NATIVE_MATH_STYLE } from '../math-style';
+import { createInteractiveHtml, createPng, saveExport, embedSvgImages, type ExportFormat } from '../export';
 
 // ==================== 类型定义 ====================
 
@@ -168,7 +170,7 @@ export const DEFAULT_TOC_OPTIONS: TocMindmapOptions = {
 // STYLE BLOCK (等效于 <style> 标签)
 // =======================================================
 // 定义组件的 CSS 样式
-const COMPONENT_STYLE = `
+const COMPONENT_STYLE = NATIVE_MATH_STYLE + `
   .markmap-toc-modal {
     position: fixed;                    /* 固定定位 */
     top: 50px;                          /* 距离顶部 50px */
@@ -495,9 +497,10 @@ export class TocMindmapComponent {
   public updateOptions(newOptions: Partial<TocMindmapOptions>) {
     // 合并新配置到当前配置，优先使用新配置
     this.options = { ...this.options, ...newOptions };
+    this.optionsRevision++;
     this._updateHighlightStyle(); // 更新高亮样式
     this.state.lastHeadingsHash = ''; // 配置变化也需要重新应用渲染选项
-    this.resetFoldState = newOptions.initialExpandLevel !== undefined && newOptions.initialExpandLevel !== this.lastExpandLevel;
+    this.resetFoldState = this.resetFoldState || (newOptions.initialExpandLevel !== undefined && newOptions.initialExpandLevel !== this.lastExpandLevel);
     this.lastExpandLevel = this.options.initialExpandLevel;
 
     // 如果 widthPercentWhenPin 改变且当前处于 pin 状态，重新计算布局
@@ -561,21 +564,30 @@ export class TocMindmapComponent {
   private documentId: string | undefined;
   private resetFoldState = false;
   private lastExpandLevel: number;
+  private optionsRevision = 0;
+  private disposed = false;
   private updating = false;
   private updateRequested = false;
   private timers = new Map<number, (() => void) | undefined>();
+  private fitTimer: number | undefined;
 
   /** 延迟操作归组件所有，关闭时执行必要恢复并取消回调。 */
-  private schedule(callback: () => void, delay: number, cleanup?: () => void): void {
+  private schedule(callback: () => void, delay: number, cleanup?: () => void): number {
     const timer = window.setTimeout(() => {
       this.timers.delete(timer);
       callback();
     }, delay);
     this.timers.set(timer, cleanup);
+    return timer;
   }
 
   /** 释放当前导图的动画、数据及引用，用于关闭和空文档。 */
   private clearMap(): void {
+    if (this.fitTimer !== undefined) {
+      clearTimeout(this.fitTimer);
+      this.timers.delete(this.fitTimer);
+      this.fitTimer = undefined;
+    }
     if (this.state.markmap) {
       this.state.markmap.svg.interrupt();
       this.state.markmap.svg.selectAll('*').interrupt().interrupt('highlight');
@@ -633,7 +645,7 @@ export class TocMindmapComponent {
     } catch (error) {
       // 记录错误日志，包含错误信息和错误对象
       logger(`TOC 窗口显示失败: ${error.message}`, 'error', error);
-      this.destroy(); // 显示失败时自我销毁
+      this.hide(); // 释放本次显示资源，保留样式供重试
       throw error;    // 重新抛出错误
     }
   }
@@ -716,6 +728,7 @@ export class TocMindmapComponent {
    * 2. 从页面中移除注入的样式表
    */
   public destroy = () => {
+    this.disposed = true;
     this.hide();  // 隐藏窗口并清理所有资源
     // 移除样式表
     document.getElementById('markmap-toc-component-style')?.remove();
@@ -735,7 +748,8 @@ export class TocMindmapComponent {
    */
   private _createElement() {
     const container = document.createElement('div');          // 创建 div 元素作为容器
-    container.className = 'markmap-toc-modal';                // 设置 CSS 类名
+    container.className = 'markmap-toc-modal';
+    container.classList.toggle('markmap-native-math', isMacOS());                // 设置 CSS 类名
     // 根据配置添加工具栏位置类
     if (this.options.toolbarPosition === 'side') {
       container.classList.add('toolbar-side');
@@ -969,6 +983,31 @@ export class TocMindmapComponent {
     return result.join('\n');
   }
 
+  /** 按顶层块转换，再按标题层级组树，保留标题正文与子标题并列的顺序。 */
+  private transformDocument(markdown: string): IPureNode {
+    const lines = markdown.split('\n');
+    const root: IPureNode = { content: '', children: [] };
+    const headings: Array<{ level: number; node: IPureNode }> = [{ level: 0, node: root }];
+    let consumedThrough = 0;
+    for (const token of this.transformer.md.parse(markdown, {})) {
+      if (token.level !== 0 || !token.map || token.map[0] < consumedThrough) continue;
+      const [start, end] = token.map;
+      consumedThrough = end;
+      const part = this.transformer.transform(lines.slice(start, end).join('\n')).root;
+      if (!part.content && !part.children?.length) continue;
+      if (token.type === 'heading_open') {
+        const level = Number(token.tag.slice(1));
+        while (headings[headings.length - 1].level >= level) headings.pop();
+        headings[headings.length - 1].node.children!.push(part);
+        headings.push({ level, node: part });
+      } else {
+        const nodes = part.content ? [part] : part.children || [];
+        headings[headings.length - 1].node.children!.push(...nodes);
+      }
+    }
+    return root.children!.length === 1 ? root.children![0] : root;
+  }
+
   /**
    * 统一的点击事件处理器
    *
@@ -1004,6 +1043,7 @@ export class TocMindmapComponent {
       } catch (error) {
         // 记录按钮操作失败的日志
         logger(`按钮操作失败: ${error.message}`, 'error', error);
+        this._showToast(`操作失败：${error instanceof Error ? error.message : String(error)}`, 'error');
       }
       return; // 处理完按钮点击后结束，避免继续处理其他点击逻辑
     }
@@ -1048,6 +1088,7 @@ export class TocMindmapComponent {
     // 如果组件元素不存在，则直接返回
     if (!this.state.element) return;
 
+    const optionsRevision = this.optionsRevision;
     const documentId = this.editorAdapter.getDocumentId?.();
     if (documentId !== this.documentId) {
       this.documentId = documentId;
@@ -1085,7 +1126,7 @@ export class TocMindmapComponent {
 
     markdownContent = this._preprocessMarkdownForMarkmap(markdownContent);
 
-    const { root } = this.transformer.transform(markdownContent); // 转换 Markdown 为思维导图数据
+    const root = this.transformDocument(markdownContent);
 
     // 检测是否有虚拟根节点（多个一级标题时 Markmap 会创建虚拟根）
     const hasVirtualRoot = !root.content && root.children && root.children.length > 1;
@@ -1118,11 +1159,22 @@ export class TocMindmapComponent {
     await markmap.setData(root, options);
     // 渲染期间可能关闭窗口或切换文档，结果只写回所属实例。
     if (this.state.markmap !== markmap) return;
-    this.state.lastHeadingsHash = contentHash;
-    this.resetFoldState = false;
+    if (this.editorAdapter.getDocumentId?.() !== documentId) {
+      this.updateRequested = true;
+      return;
+    }
+    if (this.optionsRevision === optionsRevision) {
+      this.state.lastHeadingsHash = contentHash;
+      this.resetFoldState = false;
+    }
     this._syncMapsAfterRender(markmap.state.data!, headingRefs, blockRefs);
     if (isNew || this.options.autoFitWhenUpdate) {
-      this.schedule(() => {
+      if (this.fitTimer !== undefined) {
+        clearTimeout(this.fitTimer);
+        this.timers.delete(this.fitTimer);
+      }
+      this.fitTimer = this.schedule(() => {
+        this.fitTimer = undefined;
         if (this.state.markmap === markmap) void markmap.fit();
       }, this.options.delayInitialFit);
     }
@@ -1486,8 +1538,14 @@ export class TocMindmapComponent {
   /**
    * 显示简易提示
    */
-  private _showToast(message: string, type: 'success' | 'error' = 'success') {
-    if (!this.isVisible) return;
+  public showError(error: unknown, context: string): void {
+    const message = error instanceof Error ? error.message : String(error);
+    this._showToast(`${context}：${message}`, 'error', true);
+  }
+
+  /** 显示短暂操作反馈，最终释放后的异步结果保持静默。 */
+  private _showToast(message: string, type: 'success' | 'error' = 'success', allowHidden = false) {
+    if (this.disposed || (!this.isVisible && !allowHidden)) return;
     const toast = document.createElement('div');
     toast.textContent = message;
     toast.style.cssText = `
@@ -1541,6 +1599,7 @@ export class TocMindmapComponent {
         blob = new Blob([html], { type: 'text/html;charset=utf-8' });
       } else {
         const exportedSvg = this._createExportSvg(svg, markmap);
+        await embedSvgImages(exportedSvg, svg);
         blob = format === 'png'
           ? await createPng(exportedSvg)
           : new Blob([new XMLSerializer().serializeToString(exportedSvg)], { type: 'image/svg+xml;charset=utf-8' });
@@ -1550,7 +1609,6 @@ export class TocMindmapComponent {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       logger(`导出失败：${message}`, 'error', error);
-      this._showToast(`导出失败：${message}`, 'error');
       throw error;
     }
   }
@@ -1567,6 +1625,10 @@ export class TocMindmapComponent {
   /** 按完整内容范围导出，解除窗口缩放、平移，并固化当前主题颜色。 */
   private _createExportSvg(svg: SVGSVGElement, markmap: Markmap): SVGSVGElement {
     const clone = svg.cloneNode(true) as SVGSVGElement;
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    clone.classList.toggle('markmap-native-math', isMacOS());
+    style.textContent = exportStyle + NATIVE_MATH_STYLE;
+    clone.insertBefore(style, clone.firstChild);
     const group = clone.querySelector('g')!;
     const bbox = markmap.g.node()!.getBBox();
     if (!bbox.width || !bbox.height) throw new Error('导图尚未渲染，请稍后再导出');
@@ -1972,9 +2034,7 @@ export class TocMindmapComponent {
   /**
    * 初始化实时更新功能
    *
-   * 策略：
-   * 1. 首先尝试使用 Typora 的原生事件系统（性能最优）
-   * 2. 如果失败，回退到 MutationObserver（兼容性方案）
+   * 只订阅正文结构与文字变化，防抖后读取最新文档。
    */
   private _initRealTimeUpdate() {
     // 如果未启用实时更新功能，则记录日志并返回
@@ -1994,7 +2054,7 @@ export class TocMindmapComponent {
    * 通过限制监听范围和使用防抖机制，提升性能并减少不必要的更新。
    *
    * 性能优化策略：
-   * 1. 只监听标题元素的变化，忽略其他内容
+   * 1. 只监听正文区域，导图 DOM 位于该区域之外
    * 2. 使用防抖处理，避免频繁更新
    * 3. 不监听属性变化，只关注结构和文本变化
    */
@@ -2050,6 +2110,7 @@ export class TocMindmapComponent {
     } catch (error) {
       // 记录处理内容变化时的错误日志
       logger(`处理内容变化时出错: ${error.message}`, 'error', error);
+      this._showToast(`导图更新失败：${error instanceof Error ? error.message : String(error)}`, 'error');
     }
   }
 

@@ -1,0 +1,2 @@
+windowA remaining: 0
+{"title":"Window B","children":2,"instances":1,"style":true}

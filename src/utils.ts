@@ -32,9 +32,9 @@ export const isWindows = () => navigator.platform.includes('Win')
  */
 const DEBUG_CONFIG = {
   /** 是否启用调试功能 */
-  enabled: true,
+  enabled: false,
   
-  /** 是否在页面中显示日志（macOS 默认开启） */
+  /** 是否在页面中显示调试日志（默认关闭） */
   showInPage: false,
   
   /** 是否显示时间戳 */

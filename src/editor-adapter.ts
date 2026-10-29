@@ -16,6 +16,8 @@ export class TyporaAdapter implements IEditorAdapter {
   getDocumentId(): string {
     const filename = File.bundle?.filePath || File.filePath;
     if (filename) return filename;
+    const untitledId = (File.bundle as typeof File.bundle & { untitledId?: string | number })?.untitledId;
+    if (untitledId !== undefined && untitledId !== null) return `untitled-${untitledId}`;
     const document = File.bundle || editor;
     let id = this.documentIds.get(document);
     if (!id) { id = `untitled-${++this.nextDocumentId}`; this.documentIds.set(document, id); }

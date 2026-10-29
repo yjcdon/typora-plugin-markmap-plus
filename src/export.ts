@@ -2,11 +2,13 @@
  * 思维导图文件导出：独立 HTML、完整 SVG 和 PNG。
  * @author liangyujia-ai
  */
-import { path, writeFileAtomic } from './platform';
+import { path, writeFileAtomic, readLocalImageDataUrl } from './platform';
 import { File, _options } from './typora';
 import type { IPureNode } from 'markmap-common';
 import type { IMarkmapJSONOptions } from 'markmap-view';
 import exportRuntime from 'markmap-export-runtime';
+import exportStyle from 'markmap-export-style';
+import { NATIVE_MATH_STYLE } from './math-style';
 
 export type ExportFormat = 'html' | 'svg' | 'png';
 
@@ -20,6 +22,7 @@ export function createInteractiveHtml(root: IPureNode, options: Partial<IMarkmap
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Markmap</title>
+<style>${exportStyle}${NATIVE_MATH_STYLE}</style>
 <style>
 html { --bg: #fff; --text: #333; --hover: #e6f0fe; }
 html[data-theme="dark"] { --bg: #363b40; --text: #b8bfc6; --hover: #70717d; color-scheme: dark; }
@@ -40,7 +43,11 @@ button:hover { background: var(--hover); }
 <script id="markmap-data" type="application/json">${data}</script>
 <script>${runtime}</script>
 <script>
+void (async () => {
 const data = JSON.parse(document.getElementById('markmap-data').textContent);
+const nativeMath = /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent);
+document.documentElement.classList.toggle('markmap-native-math', nativeMath);
+await document.fonts.ready;
 const mm = markmap.Markmap.create('#mindmap', markmap.deriveOptions(data.options), data.root);
 mm.svg.on('dblclick.zoom', null);
 const themeButton = document.getElementById('theme');
@@ -58,9 +65,76 @@ document.getElementById('zoom-out').onclick = () => mm.rescale(1 / 1.2);
 document.getElementById('fit').onclick = () => mm.fit();
 window.addEventListener('resize', () => mm.fit());
 updateThemeButton();
+// 节点生成后等待实际使用的公式字体，再按最终尺寸布局。
+await document.fonts.ready;
+await mm.renderData();
+await mm.fit();
+})();
 </script>
 </body>
 </html>`;
+}
+
+/** 图片转为内嵌的原生 SVG image，保持布局并兼容 WebKit 的 SVG 转 PNG 解码。 */
+export async function embedSvgImages(clone: SVGSVGElement, source: SVGSVGElement): Promise<void> {
+  const sourceImages = Array.from(source.querySelectorAll<HTMLImageElement>('img'));
+  const images = Array.from(clone.querySelectorAll<HTMLImageElement>('img'));
+  const embedded = new Map<string, Promise<string>>();
+  for (let index = 0; index < images.length; index += 1) {
+    const original = sourceImages[index];
+    const src = original.currentSrc || original.src;
+    if (!src) continue;
+    let content = embedded.get(src);
+    if (!content) {
+      content = (async () => {
+        if (/^data:/i.test(src)) return src;
+        if (/^file:/i.test(src) || path.isAbsolute(src)) return readLocalImageDataUrl(src);
+        if (!original.complete || !original.naturalWidth) throw new Error(`图片尚未加载，稍后再导出：${src}`);
+        const canvas = document.createElement('canvas');
+        canvas.width = original.naturalWidth;
+        canvas.height = original.naturalHeight;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('无法创建图片导出画布');
+        try {
+          context.drawImage(original, 0, 0);
+          return canvas.toDataURL('image/png');
+        } catch (error) {
+          const reason = error instanceof Error ? error.message : String(error);
+          throw new Error(`图片导出受限：${src}（${reason}）。可将图片保存到本地后导出。`);
+        } finally {
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+      })();
+      embedded.set(src, content);
+    }
+    const dataUrl = await content;
+    const computed = getComputedStyle(original);
+    images[index].style.width = computed.width;
+    images[index].style.height = computed.height;
+    images[index].removeAttribute('src');
+    images[index].removeAttribute('srcset');
+    images[index].removeAttribute('sizes');
+    const originalGroup = original.closest('g') as SVGGElement;
+    const cloneGroup = images[index].closest('g') as SVGGElement;
+    const matrix = originalGroup.getScreenCTM();
+    if (!matrix) throw new Error('图片位置尚未就绪，请稍后导出');
+    const inverse = matrix.inverse();
+    const rect = original.getBoundingClientRect();
+    const topLeft = new DOMPoint(rect.left, rect.top).matrixTransform(inverse);
+    const bottomRight = new DOMPoint(rect.right, rect.bottom).matrixTransform(inverse);
+    const image = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+    image.setAttribute('x', String(topLeft.x));
+    image.setAttribute('y', String(topLeft.y));
+    image.setAttribute('width', String(bottomRight.x - topLeft.x));
+    image.setAttribute('height', String(bottomRight.y - topLeft.y));
+    image.setAttribute('preserveAspectRatio', 'none');
+    image.setAttribute('href', dataUrl);
+    // 保留 HTML 图片占位，使段落文字沿用当前导图的换行和高度。
+    images[index].style.visibility = 'hidden';
+    cloneGroup.append(image);
+  }
+  clone.querySelectorAll('picture source').forEach(element => element.removeAttribute('srcset'));
 }
 
 /** 将完整 SVG 转为 PNG，保持 SVG 的尺寸、文字和背景。 */
