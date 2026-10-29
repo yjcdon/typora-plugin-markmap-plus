@@ -57,14 +57,6 @@ jobs:
             git log --pretty=format:"- %s (%h)" >> CHANGELOG.md
           fi
 
-      # 创建发布包
-      - name: Create release package
-        run: |
-          cd dist
-          zip -r ../plugin.zip .
-          cd ..
-          ls -la *.zip
-
       # 创建 GitHub Release
       - name: Create Release
         uses: softprops/action-gh-release@v2

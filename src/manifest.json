@@ -1,16 +1,21 @@
 {
-  "id": "util6.markmapplus",
-  "name": "MarkmapPlus",
-  "description": "Use Markmap in Typora - Create interactive mind maps from markdown content.",
-  "author": "util6",
-  "authorUrl": "https://github.com/util6",
-  "repo": "yjcdon/typora-plugin-markmap-plus",
-  "version": "1.7.4",
-  "minAppVersion": "1.4.0",
-  "minCoreVersion": "2.3.33",
+  "id": "markmap-plus",
+  "name": "Markmap Plus",
+  "version": "2.0.0",
+  "description": "独立 Typora 思维导图插件",
   "platforms": [
     "win32",
-    "linux",
     "darwin"
-  ]
+  ],
+  "settingsSchemaVersion": 1,
+  "compatibility": {
+    "macOS": {
+      "status": "pending",
+      "typoraVersions": []
+    },
+    "windows10": {
+      "status": "pending",
+      "typoraVersions": []
+    }
+  }
 }

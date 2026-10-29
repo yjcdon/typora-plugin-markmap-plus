@@ -1,18 +1,15 @@
 {
   "private": true,
   "name": "typora-plugin-markmap-plus",
-  "version": "1.7.4",
+  "version": "2.0.0",
   "description": "Enhanced Typora plugin for creating interactive mind maps with advanced features and settings.",
   "type": "module",
-  "main": "dist/main.js",
+  "main": "dist/markmap-plus/app/main.js",
   "scripts": {
     "dev": "node build.js",
-    "build": "rollup -c rollup.config.js",
-    "build:prod": "NODE_ENV=production rollup -c rollup.config.js",
-    "clean": "rm -rf dist release",
-    "deploy": "./deploy.sh",
-    "deploy:prod": "./deploy.sh --prod",
-    "release": "./release.sh"
+    "build": "node build.js",
+    "build:prod": "node build.js --prod",
+    "check": "tsc --noEmit"
   },
   "keywords": [
     "typora",
@@ -24,30 +21,12 @@
   "author": "util6",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.23.2",
-    "@babel/preset-env": "^7.23.2",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-replace": "^5.0.4",
-    "@rollup/plugin-strip": "^3.0.4",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.5",
-    "@rollup/plugin-virtual": "^3.0.2",
     "@types/jquery": "3.3.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "16.18.0",
     "@types/typora": "npm:@typora-community-plugin/typora-types@^1.0.13",
-    "@typora-community-plugin/core": "^2.5.28",
     "archiver": "^5.3.2",
     "esbuild": "^0.19.2",
-    "esbuild-plugin-typora": "npm:@typora-community-plugin/esbuild-plugin-typora@^1.0.12",
-    "esbuild-sass-plugin": "^2.12.0",
-    "rollup": "^4.1.4",
-    "rollup-plugin-scss": "^4.0.0",
-    "rollup-plugin-typora": "npm:@typora-community-plugin/rollup-plugin-typora@^1.0.6",
-    "sass": "^1.69.5",
     "tslib": "^2.6.2",
     "typescript": "^5.1.6"
   },
@@ -59,6 +38,5 @@
     "markmap-lib": "^0.18.12",
     "markmap-render": "^0.17.0",
     "markmap-view": "^0.18.12"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  }
 }
