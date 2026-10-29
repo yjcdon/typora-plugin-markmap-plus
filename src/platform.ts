@@ -53,15 +53,22 @@ function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;
 }
 
-/** 等待已核实的原生桥接命令完成，并保留系统错误及工作目录。 */
+/** 用本次命令标记隔开 shell 启动输出，错误提示保留实际文件操作原因。 */
 function runCommand(args: string, cwd: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const timeout = window.setTimeout(() => reject(new Error(`文件操作等待超时：${cwd}`)), 30000);
     try {
-      bridge.callHandler('controller.runCommand', { args, cwd }, ([success, output, error]) => {
+      const marker = `MARKMAP_COMMAND_${Array.from(crypto.getRandomValues(new Uint32Array(4)), value => value.toString(16)).join('')}`;
+      const taggedArgs = `printf '%s\\n' ${shellQuote(marker)} >&2; ${args}`;
+      bridge.callHandler('controller.runCommand', { args: taggedArgs, cwd }, ([success, output, error]) => {
         window.clearTimeout(timeout);
         if (success) resolve(output);
-        else reject(new Error(`${error || '文件操作失败'}（${cwd}）`));
+        else {
+          const stderr = error || '';
+          const boundary = stderr.indexOf(marker);
+          const reason = boundary < 0 ? stderr : stderr.slice(boundary + marker.length).replace(/^\r?\n/, '');
+          reject(new Error(`${reason || '文件操作失败'}（${cwd}）`));
+        }
       });
     } catch (error) {
       window.clearTimeout(timeout);
