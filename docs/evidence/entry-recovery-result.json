@@ -1,0 +1,15 @@
+{
+  "originalPageSha256": "9a524a1c21c90054a440c801e073ec15d69401340bbbc959242222fefef0a9ae",
+  "basePageSha256": "51072f2ca6b922c01a6700d49067ce49b7561500ecaf467dde8e45a8707c1b40",
+  "markersAfterOverwrite": 0,
+  "method": "simulate entry overwritten on same Typora version, rebuild from current page per INSTALL.md",
+  "otherPageContentPreserved": true,
+  "markersAfterRecovery": 1,
+  "recoveredPageSha256": "b5f795479d165ae709bd23d6876a8ba2c28221024c0eef1e1ce1a82bd4657b1b",
+  "hostDocumentVisibleWhenEntryMissing": true,
+  "buttonAbsentWhenEntryMissing": true,
+  "recoveredButtonVisible": true,
+  "recoveredMapOpened": true,
+  "currentTyporaVersion": "1.12.3",
+  "futureTyporaVersionCompatibility": "pending actual target version"
+}

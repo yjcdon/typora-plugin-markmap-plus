@@ -32,7 +32,7 @@
 <!-- MARKMAP_PLUS_END -->
 ```
 
-AI 将 PLUGIN_LOADER_URL 替换为实际 URL，按 URL 规则编码路径，并按 JavaScript 字符串规则转义。macOS 使用目标 loader.js 的绝对 file URL，例如 file:///Users/example/Library/Application%20Support/abnerworks.Typora/markmap-plus/loader.js。Windows 使用 typora://app/userData/markmap-plus/loader.js，实测宿主协议可读性。入口加载失败代表目录已移走，保持静默；安装检查负责发现放置错误。
+AI 将 PLUGIN_LOADER_URL 替换为实际 URL，按 URL 规则编码路径，并按 JavaScript 字符串规则转义。macOS 使用目标 loader.js 的绝对 file URL，例如 file:///Users/example/Library/Application%20Support/abnerworks.Typora/markmap-plus/loader.js。Windows 使用 typora://app/userData/markmap-plus/loader.js，实测宿主协议可读性。loader 加载失败时入口静默结束；安装检查核验实际资源位置与访问条件。
 
 ## 旧设置迁移
 
