@@ -1,0 +1,57 @@
+{
+  "execution": "AI INSTALL.md migration procedure rehearsal; actual related backup read-only comparison, then constructed filesystem fixtures",
+  "system": "macOS 27.2 arm64",
+  "plugin": "2.0.0",
+  "actualBackup": {
+    "source": "~/.Trash/plugins/settings/data/util6.markmapplus.json",
+    "sourceSha256": "e21c61f5a113b1a3045f3348bfe7cb2ee07672b2b18a9b60500f38a6090b2b4b",
+    "currentIndependentSha256": "f9d71f5a76551e8b3a156a4e11a9cda3d6b1b50f1b056d657906f77d4b8149b7",
+    "legacyVersion": 1,
+    "fields": [
+      {
+        "key": "exportDirectory",
+        "sourceValue": "/Users/yjcdon/Downloads",
+        "currentValue": "/Users/yjcdon/Downloads",
+        "matches": true
+      }
+    ],
+    "tempConversionValuesExactlyMatch": true,
+    "sourceUnchanged": true,
+    "currentIndependentUnchanged": true
+  },
+  "constructedFixtures": {
+    "priorityCases": [
+      {
+        "availableIds": [
+          "util6.markmapplus",
+          "typora-community-plugin.markmapplus",
+          "typora-plugin-markmap-plus"
+        ],
+        "selectedId": "util6.markmapplus",
+        "valuesPreserved": true
+      },
+      {
+        "availableIds": [
+          "typora-community-plugin.markmapplus",
+          "typora-plugin-markmap-plus"
+        ],
+        "selectedId": "typora-community-plugin.markmapplus",
+        "valuesPreserved": true
+      },
+      {
+        "availableIds": [
+          "typora-plugin-markmap-plus"
+        ],
+        "selectedId": "typora-plugin-markmap-plus",
+        "valuesPreserved": true
+      }
+    ],
+    "existingIndependentWins": true,
+    "existingIndependentBytesUnchanged": true,
+    "selectedLegacyPluginDisabled": true,
+    "otherPluginKeysAndValuesPreserved": true,
+    "otherPluginsRuntimeExecuted": false
+  },
+  "frameworkRestored": false,
+  "failures": []
+}

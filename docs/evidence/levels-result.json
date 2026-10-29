@@ -1,0 +1,130 @@
+{
+  "componentSourceSHA256" : "36fdd14a39cd07f093feb7e77cc62c2301e39a25b1bdfdc8e702057ba47ba1ad",
+  "executionDate" : "2026-10-29",
+  "externalResourceElements" : [
+
+  ],
+  "externalResources" : [
+
+  ],
+  "failures" : [
+
+  ],
+  "levels" : [
+    {
+      "bodyNodes" : 0,
+      "dataNodes" : 6,
+      "headingNodes" : 6,
+      "level" : 1,
+      "visibleHeadingTags" : [
+        "h1"
+      ],
+      "visibleNodes" : 1
+    },
+    {
+      "bodyNodes" : 0,
+      "dataNodes" : 6,
+      "headingNodes" : 6,
+      "level" : 2,
+      "visibleHeadingTags" : [
+        "h2",
+        "h1"
+      ],
+      "visibleNodes" : 2
+    },
+    {
+      "bodyNodes" : 0,
+      "dataNodes" : 6,
+      "headingNodes" : 6,
+      "level" : 3,
+      "visibleHeadingTags" : [
+        "h3",
+        "h2",
+        "h1"
+      ],
+      "visibleNodes" : 3
+    },
+    {
+      "bodyNodes" : 0,
+      "dataNodes" : 6,
+      "headingNodes" : 6,
+      "level" : 4,
+      "visibleHeadingTags" : [
+        "h4",
+        "h3",
+        "h2",
+        "h1"
+      ],
+      "visibleNodes" : 4
+    },
+    {
+      "bodyNodes" : 0,
+      "dataNodes" : 6,
+      "headingNodes" : 6,
+      "level" : 5,
+      "visibleHeadingTags" : [
+        "h5",
+        "h4",
+        "h3",
+        "h2",
+        "h1"
+      ],
+      "visibleNodes" : 5
+    },
+    {
+      "bodyNodes" : 11,
+      "dataNodes" : 17,
+      "headingNodes" : 6,
+      "level" : 6,
+      "visibleHeadingTags" : [
+        "h6",
+        "h5",
+        "h4",
+        "h3",
+        "h2",
+        "h1"
+      ],
+      "visibleNodes" : 17
+    }
+  ],
+  "listChanges" : {
+    "added" : true,
+    "baselineNodes" : 17,
+    "removed" : true
+  },
+  "localImages" : [
+    {
+      "complete" : true,
+      "src" : "review:\/\/local\/picture.png",
+      "width" : 810
+    }
+  ],
+  "localSchemeRequests" : [
+    "review:\/\/local\/katex.css",
+    "review:\/\/local\/highlight.css",
+    "review:\/\/local\/picture.png",
+    "review:\/\/local\/fonts\/KaTeX_Main-Regular.woff2",
+    "review:\/\/local\/fonts\/KaTeX_Math-Italic.woff2"
+  ],
+  "networkApiCalls" : [
+
+  ],
+  "observationLimitations" : [
+    "ResourceTiming returned no entries for the custom URL scheme. Local requests are confirmed by WKURLSchemeHandler; HTTP absence is bounded to this fixture DOM resource references and fetch\/XHR calls, rather than a system-wide packet trace."
+  ],
+  "os" : "Version 27.2 (Build 26B123)",
+  "remainingComponents" : 0,
+  "resourceElements" : [
+    "review:\/\/local\/katex.css",
+    "review:\/\/local\/highlight.css",
+    "review:\/\/local\/picture.png"
+  ],
+  "resources" : [
+
+  ],
+  "sameWindow" : {
+    "changed" : true,
+    "mappedToCurrentDocument" : true
+  },
+  "scope" : "Actual current component + Markmap\/KaTeX\/interact in WKWebView; synthetic editor adapter; local CSS\/fonts\/image resource timing and custom-scheme request log; not full Typora network tracing"
+}

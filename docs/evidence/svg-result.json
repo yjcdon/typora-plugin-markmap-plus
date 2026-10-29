@@ -1,0 +1,23 @@
+{
+  "actualTyporaExport": true,
+  "nodes": 6,
+  "nativeImages": 1,
+  "mathInsideNode": true,
+  "imageRect": {
+    "x": 347.53179931640625,
+    "y": 46.672000885009766,
+    "width": 620.5188598632812,
+    "height": 225.09017944335938,
+    "top": 46.672000885009766,
+    "right": 968.0506591796875,
+    "bottom": 271.76218032836914,
+    "left": 347.53179931640625
+  },
+  "externalResources": [],
+  "foldedExport": {
+    "actualTyporaExport": true,
+    "visibleNodes": 4,
+    "nativeImages": 0,
+    "collapsedBranchBodyOmitted": true
+  }
+}

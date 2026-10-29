@@ -1,0 +1,59 @@
+{
+  "execution": "Actual src/loader.js in Node VM with controlled DOM, resource onload callbacks, and virtual clock",
+  "sourceSha256": "b82ee515606cf24fd2e6b532a3c20a3de23178d10ea8f1ccc71b77e761e4376b",
+  "readinessDeadlineMs": 15000,
+  "cases": [
+    {
+      "signalAppearedAtMs": 500,
+      "readyObservedAtMs": 600,
+      "readinessChecks": 7,
+      "duplicateEvaluationAfterReady": true,
+      "observedForAdditionalMs": 20000,
+      "beforeDispose": {
+        "status": "ready",
+        "starts": 1,
+        "remainingTimers": 0,
+        "resourceElements": 3
+      },
+      "cleanupCalls": 1,
+      "remainingTimers": 0,
+      "remainingWindowListeners": 0,
+      "allResourcesRemoved": true
+    },
+    {
+      "signalAppearedAtMs": 5000,
+      "readyObservedAtMs": 5100,
+      "readinessChecks": 52,
+      "duplicateEvaluationAfterReady": true,
+      "observedForAdditionalMs": 20000,
+      "beforeDispose": {
+        "status": "ready",
+        "starts": 1,
+        "remainingTimers": 0,
+        "resourceElements": 3
+      },
+      "cleanupCalls": 1,
+      "remainingTimers": 0,
+      "remainingWindowListeners": 0,
+      "allResourcesRemoved": true
+    },
+    {
+      "signalAppearedAtMs": 14800,
+      "readyObservedAtMs": 14900,
+      "readinessChecks": 150,
+      "duplicateEvaluationAfterReady": true,
+      "observedForAdditionalMs": 20000,
+      "beforeDispose": {
+        "status": "ready",
+        "starts": 1,
+        "remainingTimers": 0,
+        "resourceElements": 3
+      },
+      "cleanupCalls": 1,
+      "remainingTimers": 0,
+      "remainingWindowListeners": 0,
+      "allResourcesRemoved": true
+    }
+  ],
+  "failures": []
+}
