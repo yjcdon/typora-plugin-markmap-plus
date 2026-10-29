@@ -1,0 +1,30 @@
+{
+  "uninstall": {
+    "markersBefore": 1,
+    "markersAfter": 0,
+    "programDirectoryExists": false,
+    "basePageSha256": "20e72dd7e55e58d69926b51596a97eedaf24b2e58a81dd89ffb29a9f3dd83d52",
+    "settingsWidth": 520,
+    "hostReopened": true
+  },
+  "repeatUninstall": {
+    "pageUnchanged": true,
+    "programDirectoryExists": false
+  },
+  "reinstall": {
+    "singleMarker": true,
+    "repeatPageUnchanged": true,
+    "settingsPreserved": true,
+    "programSha256": "5f29367024efebc66b06810b592e991212766327eed7d8551035f59a690cbd7f"
+  },
+  "missingProgram": {
+    "visibleError": true,
+    "messageIncludesResourcePath": true,
+    "hostDocumentVisible": true
+  },
+  "invalidSettings": {
+    "originalPreserved": true,
+    "visibleBusinessFieldError": true,
+    "restoredOriginalSettings": true
+  }
+}

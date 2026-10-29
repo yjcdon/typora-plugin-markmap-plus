@@ -33,10 +33,11 @@
     console.error('[Markmap Plus]', error);
     const notice = document.createElement('div');
     notice.setAttribute('role', 'alert');
-    notice.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:100000;max-width:460px;padding:16px;background:#fff;color:#222;border:1px solid #b44;border-radius:8px;';
+    notice.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:100000;max-width:min(460px,calc(100vw - 40px));box-sizing:border-box;padding:16px;background:var(--bg-color,#fff);color:var(--text-color,#222);border:1px solid #b44;border-radius:10px;overflow-wrap:anywhere;white-space:normal;font:14px/1.5 system-ui,sans-serif;';
     notice.textContent = `Markmap Plus 启动失败：${state.error}`;
     const close = document.createElement('button');
     close.textContent = '关闭';
+    close.style.cssText = 'display:block;margin-top:12px;padding:6px 12px;min-height:32px;color:inherit;background:var(--bg-color,#fff);border:1px solid #85858a;border-radius:6px;cursor:pointer;';
     close.onclick = () => notice.remove();
     notice.append(close);
     resources.push(notice);
