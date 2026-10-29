@@ -111,7 +111,7 @@ export class SettingsPanel {
         status.textContent = `读取失败：${error instanceof Error ? error.message : String(error)}`;
         retry.hidden = false;
       } finally {
-        retry.disabled = false;
+        if (this.generation === generation) retry.disabled = false;
       }
     };
     retry.onclick = () => { void load(); };
