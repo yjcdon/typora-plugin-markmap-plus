@@ -2,7 +2,7 @@
   "private": true,
   "name": "typora-plugin-markmap-plus",
   "version": "2.0.0",
-  "description": "Enhanced Typora plugin for creating interactive mind maps with advanced features and settings.",
+  "description": "Independent Typora mind map plugin powered by Markmap, with Markdown navigation and offline HTML, SVG and PNG export.",
   "type": "module",
   "main": "dist/markmap-plus/app/main.js",
   "scripts": {
@@ -13,10 +13,12 @@
   },
   "keywords": [
     "typora",
-    "plugin",
+    "typora-plugin",
     "markmap",
     "mindmap",
-    "markdown"
+    "markdown",
+    "markdown-to-mindmap",
+    "macos"
   ],
   "author": "util6",
   "license": "MIT",
