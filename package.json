@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "typora-plugin-markmap-plus",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Independent Typora mind map plugin powered by Markmap, with Markdown navigation and offline HTML, SVG and PNG export.",
   "type": "module",
   "main": "dist/markmap-plus/app/main.js",

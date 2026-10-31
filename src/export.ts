@@ -1,8 +1,8 @@
 /**
  * 思维导图文件导出：独立 HTML、完整 SVG 和 PNG。
  */
-import { path, writeFileAtomic, readLocalImageDataUrl } from './platform';
-import { File, _options } from './typora';
+import { path, writeFileAtomic, readLocalImageDataUrl, getDefaultExportDirectory } from './platform';
+import { File } from './typora';
 import type { IPureNode } from 'markmap-common';
 import type { IMarkmapJSONOptions } from 'markmap-view';
 import exportRuntime from 'markmap-export-runtime';
@@ -157,10 +157,10 @@ export async function createPng(svg: SVGSVGElement): Promise<Blob> {
   }, 'image/png'));
 }
 
-/** 保存到配置目录；未配置时使用文档目录，未保存的文档使用下载目录。 */
+/** 保存到配置目录；未配置时使用当前用户的下载目录。 */
 export async function saveExport(blob: Blob, format: ExportFormat, exportDirectory: string): Promise<string> {
   const currentPath = File.bundle.filePath || File.filePath;
-  const directory = exportDirectory || (currentPath ? path.dirname(currentPath) : path.join(_options.userPath, 'Downloads'));
+  const directory = exportDirectory || getDefaultExportDirectory();
   if (!path.isAbsolute(directory) || /[\0\r\n]/.test(directory)) {
     throw new Error('导出目录必须是有效的绝对路径');
   }

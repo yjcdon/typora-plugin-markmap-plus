@@ -48,6 +48,38 @@ function validatePath(value: string): void {
   }
 }
 
+/** 默认导出位置为当前用户的下载目录。 */
+export function getDefaultExportDirectory(): string {
+  validatePath(_options.userPath);
+  return path.join(_options.userPath, 'Downloads');
+}
+
+/** 使用宿主原生对话框选择导出目录；取消返回 null，异常结果明确报错。 */
+export async function chooseExportDirectory(currentDirectory: string): Promise<string | null> {
+  if (currentDirectory) validatePath(currentDirectory);
+  let selected: unknown;
+  if (File.isNode) {
+    const result = await JSBridge.invoke('dialog.showOpenDialog', {
+      defaultPath: currentDirectory || undefined,
+      properties: ['openDirectory', 'createDirectory', 'dontAddToRecent'],
+    });
+    if (!result || !Array.isArray(result.filePaths) || result.filePaths.length > 1) {
+      throw new Error('文件夹选择器返回了无效结果');
+    }
+    selected = result.filePaths.length ? result.filePaths[0] : null;
+  } else {
+    selected = await new Promise<unknown>((resolve, reject) => {
+      try {
+        bridge.callHandler('path.selectFolderOrFile', { dir: true, defaultPath: currentDirectory }, resolve);
+      } catch (error) { reject(error); }
+    });
+  }
+  if (selected === null || selected === '') return null;
+  if (typeof selected !== 'string') throw new Error('文件夹选择器返回了无效路径');
+  validatePath(selected);
+  return selected;
+}
+
 /** 对原生命令参数逐字引用，覆盖空格、中文和单引号。 */
 function shellQuote(value: string): string {
   return `'${value.replace(/'/g, "'\\''")}'`;

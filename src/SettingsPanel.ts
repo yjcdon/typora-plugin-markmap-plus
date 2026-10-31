@@ -1,6 +1,7 @@
 /** 独立设置面板：按分组编辑，明确保存，关闭时释放 DOM。 */
 import { DEFAULT_SETTINGS, SETTING_GROUPS, type MarkmapSettings, type SettingField } from './settings';
 import { SettingsStore } from './settings-store';
+import { chooseExportDirectory, getDefaultExportDirectory } from './platform';
 
 const STYLE = `
 .markmap-settings { box-sizing:border-box; width:min(640px,calc(100vw - 32px)); max-height:calc(100vh - 48px); padding:0; border:1px solid #888; border-radius:10px; background:var(--bg-color,#fff); color:var(--text-color,#333); font:14px/1.5 system-ui,sans-serif; z-index:10000; }
@@ -18,6 +19,9 @@ const STYLE = `
 .markmap-settings input,.markmap-settings select,.markmap-settings textarea,.markmap-settings button { font:inherit; color:inherit; background:var(--bg-color,#fff); border:1px solid #888; border-radius:6px; padding:6px 8px; min-height:32px; }
 .markmap-settings input,.markmap-settings select,.markmap-settings textarea { width:100%; }
 .markmap-settings textarea { min-height:80px; resize:vertical; }
+.markmap-settings .directory-row { grid-template-columns:minmax(0,1fr) minmax(120px,220px) auto; }
+.markmap-settings .directory-picker { display:contents; }
+.markmap-settings .directory-picker button { white-space:nowrap; }
 .markmap-settings input[type=checkbox] { width:20px; height:20px; min-height:20px; justify-self:end; }
 .markmap-settings button { cursor:pointer; }
 .markmap-settings button:disabled { opacity:.6; cursor:default; }
@@ -98,6 +102,38 @@ export class SettingsPanel {
           section.appendChild(heading);
           for (const field of group.fields) {
             const { row, control } = this.createField(field, values[field.key]);
+            if (field.key === 'exportDirectory') {
+              const input = control as HTMLInputElement;
+              input.readOnly = true;
+              input.value ||= getDefaultExportDirectory();
+              row.classList.add('directory-row');
+              input.title = input.value;
+              const picker = document.createElement('div');
+              picker.className = 'directory-picker';
+              const choose = document.createElement('button');
+              choose.type = 'button';
+              choose.textContent = '选择文件夹';
+              choose.onclick = async () => {
+                choose.disabled = true;
+                save.disabled = true;
+                status.textContent = '请在系统对话框中选择导出目录。';
+                try {
+                  const selected = await chooseExportDirectory(input.value);
+                  if (this.generation !== generation) return;
+                  if (selected !== null) { input.value = selected; input.title = selected; }
+                  status.textContent = selected === null ? '已取消选择，当前目录保持不变。' : '目录已选择，点击“保存修改”生效。';
+                } catch (error) {
+                  if (this.generation === generation) status.textContent = `选择失败：${error instanceof Error ? error.message : String(error)}`;
+                } finally {
+                  if (this.generation === generation) {
+                    choose.disabled = false;
+                    save.disabled = false;
+                  }
+                }
+              };
+              picker.append(input, choose);
+              row.appendChild(picker);
+            }
             section.appendChild(row);
             controls.set(field.key, control);
           }

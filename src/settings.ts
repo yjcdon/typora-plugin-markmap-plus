@@ -76,7 +76,7 @@ export const SETTING_GROUPS: Array<{ name: string; fields: SettingField[] }> = [
     { key: 'highlightDuration', label: '高亮持续时间（毫秒）', min: 500, max: 5000 },
   ] },
   { name: '导出', fields: [
-    { key: 'exportDirectory', label: '导出目录', description: '填写绝对路径；留空使用文档目录，未保存文档使用下载目录。' },
+    { key: 'exportDirectory', label: '导出目录' },
   ] },
   { name: '高级布局', fields: [
     { key: 'spacingHorizontal', label: '节点水平间距（像素）', min: 0 },
